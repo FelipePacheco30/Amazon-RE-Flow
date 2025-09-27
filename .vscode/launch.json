@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run src.main (module)",
+      "type": "python",
+      "request": "launch",
+      "module": "src.main",
+      "console": "integratedTerminal",
+      "args": ["--source", "data/raw/reviews_sample.csv", "--out", "data/processed/reviews_clean_sample.csv", "--to-db"]
+    },
+    {
+      "name": "Debug src.main (small)",
+      "type": "python",
+      "request": "launch",
+      "module": "src.main",
+      "console": "integratedTerminal",
+      "args": ["--source", "data/raw/reviews_sample.csv", "--out", "data/processed/reviews_clean_sample_debug.csv", "--nrows", "50", "--to-db"]
+    }
+  ]
+}

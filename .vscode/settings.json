@@ -1,0 +1,5 @@
+{
+  "python.defaultInterpreterPath": "C:\\Users\\Felipe\\anaconda3\\envs\\amzreflow_py311\\python.exe",
+  "python.terminal.activateEnvironment": true,
+  "terminal.integrated.inheritEnv": true
+}

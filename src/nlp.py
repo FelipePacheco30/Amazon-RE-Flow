@@ -1,37 +1,40 @@
 # src/nlp.py
-import re
-from collections import Counter
-import nltk
-from nltk.corpus import stopwords
+import pandas as pd
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.tokenize import word_tokenize
-from nltk.sentiment import SentimentIntensityAnalyzer
+from nltk.corpus import stopwords
+import nltk
 
-# downloads (serão ignorados se já existentes)
-nltk.download('punkt', quiet=True)
-nltk.download('stopwords', quiet=True)
-nltk.download('vader_lexicon', quiet=True)
-
+nltk.download('vader_lexicon')
+nltk.download('punkt')
 STOPWORDS = set(stopwords.words('english'))
-sia = SentimentIntensityAnalyzer()
 
 def clean_text(text):
-    text = str(text).lower()
-    text = re.sub(r'http\S+','', text)
-    text = re.sub(r'[^a-z0-9\s]', ' ', text)
-    text = re.sub(r'\s+', ' ', text).strip()
-    return text
+    if pd.isna(text):
+        return ""
+    return (
+        text.lower()
+        .replace('\n', ' ')
+        .replace('\r', ' ')
+    )
 
-def get_sentiment(text):
-    if not text:
-        return 'neutral'
+def sentiment(text):
+    sia = SentimentIntensityAnalyzer()
     score = sia.polarity_scores(text)['compound']
     if score >= 0.05:
-        return 'positive'
-    if score <= -0.05:
-        return 'negative'
-    return 'neutral'
+        return "positive"
+    elif score <= -0.05:
+        return "negative"
+    else:
+        return "neutral"
 
 def top_keywords(text, n=5):
     tokens = [t for t in word_tokenize(text) if t.isalpha() and t not in STOPWORDS]
-    counts = Counter(tokens)
-    return ','.join([w for w,_ in counts.most_common(n)])
+    freq = pd.Series(tokens).value_counts()
+    return ','.join(freq.head(n).index.tolist())
+
+def apply_nlp(df):
+    df['clean_text'] = df['review_text'].apply(clean_text)
+    df['sentiment'] = df['clean_text'].apply(sentiment)
+    df['keywords'] = df['clean_text'].apply(lambda x: top_keywords(x, n=5))
+    return df

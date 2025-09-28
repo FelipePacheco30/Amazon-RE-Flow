@@ -1,40 +1,106 @@
 # src/nlp.py
+import re
 import pandas as pd
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+from nltk.sentiment import SentimentIntensityAnalyzer
+from collections import Counter
+
+# Baixa recursos NLTK (quiet=True evita logs extensos)
 import nltk
+nltk.download("punkt", quiet=True)
+nltk.download("stopwords", quiet=True)
+nltk.download("vader_lexicon", quiet=True)
 
-nltk.download('vader_lexicon')
-nltk.download('punkt')
-STOPWORDS = set(stopwords.words('english'))
+# Configs / constantes
+STOPWORDS = set(w.lower() for w in stopwords.words("english"))
+sia = SentimentIntensityAnalyzer()
 
-def clean_text(text):
-    if pd.isna(text):
+# padrões explícitos tratados como "moderado/neutral" (casos curtos e óbvios)
+_NEUTRAL_PHRASE_PATTERNS = [
+    r'^\s*(it is okay|it\'s okay|it is ok|it\'s ok)\.?\s*$',
+    r'^\s*(okay|ok|fine)\.?\s*$'
+]
+_NEUTRAL_PHRASE_RE = re.compile("|".join(_NEUTRAL_PHRASE_PATTERNS), flags=re.IGNORECASE)
+
+def clean_text(text: str) -> str:
+    """Limpa HTML, remove números e pontuação, converte para lowercase."""
+    if not text:
         return ""
-    return (
-        text.lower()
-        .replace('\n', ' ')
-        .replace('\r', ' ')
-    )
+    text = re.sub(r"<.*?>", " ", text)            # remove tags HTML
+    text = re.sub(r"[^a-zA-Z\s]", " ", text)      # remove números e pontuação
+    text = re.sub(r"\s+", " ", text)              # normaliza espaços
+    return text.strip().lower()
 
-def sentiment(text):
-    sia = SentimentIntensityAnalyzer()
-    score = sia.polarity_scores(text)['compound']
-    if score >= 0.05:
-        return "positive"
-    elif score <= -0.05:
-        return "negative"
-    else:
+def tokenize_and_remove_stopwords(text: str) -> list:
+    """Tokeniza e remove stopwords; retorna lista de tokens em minúsculas."""
+    if not text:
+        return []
+    tokens = word_tokenize(text)
+    tokens = [t.lower() for t in tokens if t.isalpha()]  # só palavras
+    tokens = [t for t in tokens if t not in STOPWORDS]
+    return tokens
+
+def sentiment_vader(text: str) -> str:
+    """
+    Classifica sentimento como 'positive', 'negative' ou 'neutral'.
+
+    Lógica:
+    - Primeiro, detecta frases curtas/moderadas explicitamente (ex.: "It is okay.") e retorna 'neutral'.
+    - Caso contrário, usa VADER compound score com limiares:
+        compound >= 0.05  -> positive
+        compound <= -0.05 -> negative
+        entre -0.05 e 0.05 -> neutral
+    - Heurística adicional (opcional): se contém tokens moderados e score fraco, pode retornar neutral.
+    """
+    if not text or not str(text).strip():
         return "neutral"
 
-def top_keywords(text, n=5):
-    tokens = [t for t in word_tokenize(text) if t.isalpha() and t not in STOPWORDS]
-    freq = pd.Series(tokens).value_counts()
-    return ','.join(freq.head(n).index.tolist())
+    text_str = str(text).strip()
 
-def apply_nlp(df):
-    df['clean_text'] = df['review_text'].apply(clean_text)
-    df['sentiment'] = df['clean_text'].apply(sentiment)
-    df['keywords'] = df['clean_text'].apply(lambda x: top_keywords(x, n=5))
+    # Checagem explícita: frases muito curtas com "okay/ok/fine" tratadas como neutral
+    if _NEUTRAL_PHRASE_RE.match(text_str):
+        return "neutral"
+
+    scores = sia.polarity_scores(text_str)
+    compound = scores.get("compound", 0.0)
+
+    if -0.05 <= compound <= 0.05:
+        return "neutral"
+
+    # heurística: palavras que usualmente indicam opinião moderada
+    lower = text_str.lower()
+    moderate_tokens = ["okay", "ok", "fine", "alright"]
+    contains_moderate = any(re.search(rf"\b{re.escape(t)}\b", lower) for t in moderate_tokens)
+
+    if compound > 0.05:
+        # se ligeiramente positivo e contém "okay" e score for fraco, classificar neutral
+        if contains_moderate and compound < 0.20:
+            return "neutral"
+        return "positive"
+
+    if compound < -0.05:
+        return "negative"
+
+    return "neutral"
+
+def top_keywords(text: str, n: int = 5) -> str:
+    """Retorna as n palavras mais frequentes, separadas por vírgula."""
+    cleaned = clean_text(text)
+    tokens = tokenize_and_remove_stopwords(cleaned)
+    if not tokens:
+        return ""
+    counts = Counter(tokens)
+    most_common = [word for word, _ in counts.most_common(n)]
+    return ",".join(most_common)
+
+def apply_nlp(df: pd.DataFrame, text_column: str = "review_text") -> pd.DataFrame:
+    """Aplica NLP: clean_text, sentiment e top keywords no DataFrame."""
+    df = df.copy()
+    # garantir que coluna exista
+    if text_column not in df.columns:
+        df[text_column] = ""
+    df["clean_text"] = df[text_column].astype(str).apply(clean_text)
+    df["sentiment"] = df[text_column].astype(str).apply(sentiment_vader)
+    df["keywords"] = df[text_column].astype(str).apply(lambda t: top_keywords(t, n=5))
     return df

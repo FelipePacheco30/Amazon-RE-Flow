@@ -4,148 +4,559 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Amazon-RE-Flow — Demo</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <title>Amazon Reviews Dashboard — ETL & NLP</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- AOS (Animate On Scroll) -->
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --accent-orange: #FF9900;   /* Amazon-like orange */
+      --accent-dark: #131921;     /* deep dark */
+      --muted: #6b7280;
+      --bg-1: linear-gradient(135deg,#0f172a 0%, #0b2545 60%);
+      --card-shadow: 0 12px 30px rgba(11,37,69,0.06);
+      --section-title-bg: linear-gradient(90deg, rgba(255,153,0,0.95), rgba(255,120,0,0.95));
+      --footer-grad: linear-gradient(90deg,#131921 0%, #0b2545 100%);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin: 0; color: var(--accent-dark);
+      background: linear-gradient(180deg,#fbfdff 0%, #f6f8fb 100%);
+    }
+
+    /* Topbar */
+    .topbar {
+      position: sticky; top: 0; z-index: 9999;
+      background: var(--accent-dark);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 6px 20px rgba(19,25,33,0.06);
+    }
+    .topbar .navbar-brand { color: #fff !important; display:flex; gap:.6rem; align-items:center; }
+    .topbar .nav-link { color: rgba(255,255,255,0.95) !important; font-weight:600; margin-left:6px; }
+    .topbar .nav-link:hover { color: #fff !important; opacity:0.95; text-decoration:underline; }
+    .topbar .navbar-toggler { border-color: rgba(255,255,255,0.2); }
+
+    /* HERO / ABOUT - first and informative */
+    .hero-about {
+      min-height: 80vh;
+      display:flex; align-items:center;
+      color: white;
+      background: radial-gradient(1200px 400px at 10% 20%, rgba(255,153,0,0.10), transparent 8%),
+                  linear-gradient(135deg,#0b2545 10%, #0f172a 60%);
+      position:relative; overflow:hidden;
+    }
+    .hero-shape {
+      position:absolute; right:-10%; top:-10%; width:60%; height:120%;
+      background: linear-gradient(120deg, rgba(139,92,246,0.18), rgba(6,182,212,0.12));
+      transform: rotate(18deg); filter: blur(48px); opacity:0.9;
+      pointer-events:none;
+    }
+    .brand-mark {
+      width:96px; height:96px; border-radius:16px;
+      background: linear-gradient(135deg,var(--accent-orange), #ff6a00);
+      display:flex; align-items:center; justify-content:center; font-weight:800; font-size:30px;
+      color:white; box-shadow: 0 12px 36px rgba(255,153,0,0.14);
+    }
+    .hero h1 {
+      font-family:"Playfair Display", serif;
+      font-weight:700; font-size: clamp(26px, 4.8vw, 48px); margin:0;
+      letter-spacing:-0.01em;
+    }
+    .hero p.lead { color: rgba(255,255,255,0.95); margin-top:12px; font-size:1.05rem; }
+
+    .cta-row .btn { min-width:150px; border-radius:10px; }
+
+    .wave { display:block; width:100%; height:72px; overflow:hidden; line-height:0; }
+    .wave svg { width:100%; height:100%; }
+
+    /* Section Titles (orange blocks, centered) */
+    .section-title {
+      display:flex; align-items:center; justify-content:center;
+      background: var(--section-title-bg);
+      color:#fff; padding:10px 18px; border-radius:10px;
+      box-shadow: 0 6px 18px rgba(255,153,0,0.10); margin-bottom:18px;
+      font-weight:700; letter-spacing:0.02em;
+    }
+
+    section { padding:44px 0; }
+    .section-card { background: white; border-radius:12px; padding:18px; box-shadow: var(--card-shadow); }
+
+    .chart-wrap { height:320px; display:flex; align-items:center; justify-content:center; padding:8px; min-height:220px; }
+
+    /* REVIEWS - stylized */
+    .reviews-panel { background: linear-gradient(180deg,#fff 0%, #fffaf3 100%); border-radius:14px; padding:16px; box-shadow: 0 18px 40px rgba(11,37,69,0.05); }
+    .reviews-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+    .reviews-search { max-width:420px; width:100%; }
+    #reviews-table { border-collapse: collapse; }
+    #reviews-table thead th {
+      background: linear-gradient(90deg,var(--accent-orange), #ff7b00);
+      color: #fff; font-weight:700; border:0; vertical-align:middle; position:sticky; top:0; z-index:2;
+    }
+    #reviews-table thead th, #reviews-table tbody td { padding:10px 12px; }
+    #reviews-table tbody tr:nth-child(odd) { background: #fff; }
+    #reviews-table tbody tr:nth-child(even) { background: #fffaf0; }
+    .table-wrap { max-height:520px; overflow:auto; border-radius:8px; }
+
+    .page-btn {
+      border-radius:8px; padding:8px 12px; border:1px solid rgba(0,0,0,0.06); background:#fff;
+    }
+    .page-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+    /* Footer */
+    footer.site-footer {
+      padding:28px 0; color:#fff;
+      background: linear-gradient(90deg,#111827 0%, #0b2545 100%);
+      margin-top:22px;
+    }
+    .footer-card { max-width:1100px; margin:0 auto; display:flex; gap:18px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    .footer-brand { display:flex; gap:12px; align-items:center; }
+    .footer-brand .logo { width:46px; height:46px; background:var(--accent-orange); color:#fff; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:800; }
+
+    @media (max-width: 900px){
+      .hero { padding:30px 14px; text-align:center; }
+      .brand-mark { margin:0 auto 14px; }
+      .footer-card { text-align:center; flex-direction:column; gap:8px; }
+    }
+  </style>
 </head>
-<body class="p-4">
-  <div class="container">
-    <h1>Amazon-RE-Flow</h1>
-    <p class="lead">Demonstração — clique para rodar o pipeline e visualizar KPIs</p>
+<body id="page-top">
+  <!-- Topbar -->
+  <nav id="topbar" class="topbar navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="#page-top">
+        <div style="width:40px;height:40px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--accent-orange);font-weight:800;margin-right:10px">AR</div>
+        <div style="font-weight:700;color:#fff">Amazon Reviews Dashboard</div>
+      </a>
 
-    <div class="row mb-3" id="kpis">
-      <!-- KPIs serão preenchidos via JS -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon" style="filter: invert(1)"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-end" id="navMenu">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link page-scroll" href="#about">About</a></li>
+          <li class="nav-item"><a class="nav-link page-scroll" href="#overview">Overview</a></li>
+          <li class="nav-item"><a class="nav-link page-scroll" href="#insights">Insights</a></li>
+          <li class="nav-item"><a class="nav-link page-scroll" href="#reviews">Reviews</a></li>
+          <li class="nav-item"><a class="nav-link page-scroll" href="#export">Export</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO / ABOUT -->
+  <header class="hero-about" id="about">
+    <div class="hero-shape" aria-hidden="true"></div>
+    <div class="container hero-inner" >
+      <div class="row align-items-center">
+        <div class="col-lg-6" data-aos="fade-right">
+          <div class="brand-mark">AR</div>
+          <h1 class="mt-3">Dashboard de análises de reviews — ETL + NLP</h1>
+          <p class="lead">Pipeline completo: extração dos dados, limpeza (transform), análise de sentimento (NLP) e visualizações interativas. Rode a pipeline local, explore métricas e exporte CSV para uso em dashboards.</p>
+
+          <div class="mt-4 d-flex gap-2 cta-row">
+            <button id="run-pipeline-hero" class="btn btn-dark btn-lg">Run Pipeline</button>
+            <button id="cta-export-hero" class="btn btn-outline-light btn-lg">Generate Export</button>
+          </div>
+
+          <ul class="list-inline mt-4 text-white-50 small">
+            <li class="list-inline-item">Local ETL • SQLite</li>
+            <li class="list-inline-item">NLTK VADER • Keywords</li>
+            <li class="list-inline-item">Charts interativos</li>
+          </ul>
+        </div>
+
+        <div class="col-lg-6" data-aos="fade-left">
+          <div class="section-card">
+            <h5 style="margin-top:0">Fluxo de dados</h5>
+            <ol>
+              <li><strong>Extract:</strong> leitura do CSV bruto.</li>
+              <li><strong>Transform:</strong> limpeza, colunas renomeadas, remoção de ruído.</li>
+              <li><strong>NLP:</strong> clean_text, sentiment (VADER), top keywords.</li>
+              <li><strong>Load:</strong> salvamento em SQLite e export CSV para dashboards.</li>
+            </ol>
+            <div class="small text-muted">Use os botões para executar a pipeline e gerar/exportar dados.</div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="mb-3">
-      <button id="btn-run" class="btn btn-primary">Run Pipeline (background)</button>
-      <button id="btn-export" class="btn btn-secondary">Export CSV</button>
-      <a id="link-csv" class="btn btn-outline-success" href="#" download>Baixar CSV</a>
+    <div class="wave" aria-hidden="true" style="position:absolute;left:0;right:0;bottom:-1px;">
+      <svg viewBox="0 0 1200 72" preserveAspectRatio="none"><path d="M0,0 C300,72 600,72 1200,0 L1200,72 L0,72 Z" fill="#ffffff" opacity="0.96"></path></svg>
     </div>
+  </header>
 
-    <h3>Amostra de Reviews</h3>
-    <div id="table-area"></div>
-  </div>
+  <!-- OVERVIEW -->
+  <section id="overview">
+    <div class="container" data-aos="fade-up">
+      <div class="section-title">Overview</div>
 
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <div class="text-muted">KPIs e filtros rápidos</div>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <select id="select-product" class="form-select form-select-sm" style="width:220px;">
+            <option value="__all__">Todos os produtos</option>
+          </select>
+          <select id="select-limit" class="form-select form-select-sm" style="width:120px;">
+            <option>100</option><option>500</option><option selected>1000</option><option>5000</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-3">
+          <div class="section-card text-center py-3">
+            <div class="small text-muted">Total reviews</div>
+            <div id="kpi-total" class="h3 fw-bold">—</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="section-card text-center py-3">
+            <div class="small text-muted">Avg rating</div>
+            <div id="kpi-avg" class="h3 fw-bold">—</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="section-card text-center py-3">
+            <div class="small text-muted">Positive</div>
+            <div id="kpi-pos" class="h3 fw-bold">—</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="section-card text-center py-3">
+            <div class="small text-muted">Negative</div>
+            <div id="kpi-neg" class="h3 fw-bold">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSIGHTS -->
+  <section id="insights" style="background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);">
+    <div class="container" data-aos="fade-up">
+      <div class="section-title">Insights</div>
+      <div class="small text-muted mb-3">Visualizações interativas</div>
+
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="section-card p-3">
+            <h6 class="mb-2">Sentiment</h6>
+            <div class="chart-wrap"><canvas id="chart-sentiment"></canvas></div>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="section-card p-3">
+            <h6 class="mb-2">Rating distribution</h6>
+            <div class="chart-wrap"><canvas id="chart-rating"></canvas></div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="section-card p-3">
+            <h6 class="mb-2">Top products</h6>
+            <div class="chart-wrap"><canvas id="chart-top-products"></canvas></div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="section-card p-3">
+            <h6 class="mb-2">Top keywords</h6>
+            <div class="chart-wrap"><canvas id="chart-keywords"></canvas></div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="section-card p-3">
+            <h6 class="mb-2">Reviews over time</h6>
+            <div class="chart-wrap"><canvas id="chart-timeseries"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS TABLE -->
+  <section id="reviews">
+    <div class="container" data-aos="fade-up">
+      <div class="section-title">Reviews</div>
+
+      <div class="reviews-panel">
+        <div class="reviews-controls mb-2">
+          <div class="reviews-search">
+            <input id="search-box" class="form-control form-control-sm" placeholder="Pesquisar review_id, produto, texto..." />
+          </div>
+
+          <div class="ms-auto d-flex gap-2 align-items-center">
+            <label class="small text-muted mb-0 me-2">Linhas / página</label>
+            <select id="page-size" class="form-select form-select-sm" style="width:100px;">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-card p-2">
+          <div class="table-wrap mb-2">
+            <table class="table table-sm table-hover" id="reviews-table">
+              <thead><tr><th style="min-width:120px">ID</th><th>Produto</th><th>Rating</th><th>Sentiment</th><th>Keywords</th><th>Preview</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="small text-muted" id="table-info">—</div>
+            <div>
+              <button id="prev-page" class="page-btn me-2">Anterior</button>
+              <button id="next-page" class="page-btn">Próxima</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPORT -->
+  <section id="export" style="background: linear-gradient(90deg,#fffaf0, #f0f9ff);">
+    <div class="container" data-aos="fade-up">
+      <div class="section-title">Export</div>
+      <div class="small text-muted mb-3">Gere CSV pronto para Google Sheets / Looker Studio</div>
+      <div class="section-card p-3 d-flex justify-content-between align-items-center">
+        <div>
+          <strong>Export CSV</strong><div class="small text-muted">Clique em Gerar e depois em Download</div>
+        </div>
+        <div>
+          <button id="btn-export" class="btn btn-primary">Gerar Export</button>
+          <a id="link-csv" class="btn btn-success d-none" href="/download/export" download>Download CSV</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-card container">
+      <div class="footer-brand">
+        <div class="logo">AR</div>
+        <div>
+          <div style="font-weight:800">Amazon Reviews Dashboard</div>
+          <div class="small" style="opacity:.9">ETL • NLP • Visualizações</div>
+        </div>
+      </div>
+
+      <div class="small text-white-50">Feito com dados locais • SQLite • NLTK • Chart.js</div>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <a class="btn btn-sm" style="background:#fff;color:var(--accent-orange);font-weight:700;border-radius:8px" href="/download/export">Baixar CSV</a>
+        <a class="btn btn-sm btn-outline-light" href="/api/health">Health</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- AOS -->
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
   <script>
-    // Funções auxiliares
-    async function fetchJson(url, opts) {
-      try {
-        const res = await fetch(url, opts);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return await res.json();
-      } catch (e) {
-        console.error("fetchJson error", e);
-        return null;
-      }
-    }
-
-    // Atualiza KPIs no topo
-    async function loadStats(){
-      const j = await fetchJson('/api/stats');
-      const kpis = document.getElementById('kpis');
-      if (!j) {
-        kpis.innerHTML = '<div class="alert alert-warning">Erro ao buscar KPIs</div>';
-        return;
-      }
-      if (j.error) {
-        kpis.innerHTML = `<div class="alert alert-info">DB vazio ou não encontrado</div>`;
-        return;
-      }
-      kpis.innerHTML = `
-        <div class="col"><div class="card p-3">Total: ${j.total||0}</div></div>
-        <div class="col"><div class="card p-3">Avg Rating: ${j.avg_rating? j.avg_rating.toFixed(2) : 'N/A'}</div></div>
-        <div class="col"><div class="card p-3">% Positive: ${j.pct_pos? j.pct_pos.toFixed(1) : '0'}%</div></div>
-        <div class="col"><div class="card p-3">% Neutral: ${j.pct_neu? j.pct_neu.toFixed(1) : '0'}%</div></div>
-      `;
-      // atualiza link de download se já existir export
-      if (j.total && j.total > 0) {
-        document.getElementById('link-csv').classList.remove('d-none');
-      }
-    }
-
-    // Mostrar tabela de reviews (amostra)
-    async function loadTable(){
-      const res = await fetch('/api/reviews?limit=10');
-      if (!res.ok) {
-        document.getElementById('table-area').innerHTML = '<div class="alert alert-warning">Erro ao buscar reviews</div>';
-        return;
-      }
-      const rows = await res.json();
-      let html = '<table class="table table-sm"><thead><tr><th>id</th><th>rating</th><th>sentiment</th><th>text</th></tr></thead><tbody>';
-      for(const r of rows){
-        html += `<tr><td>${r.review_id}</td><td>${r.rating}</td><td>${r.sentiment}</td><td>${(r.review_text||'').substring(0,120)}</td></tr>`;
-      }
-      html += '</tbody></table>';
-      document.getElementById('table-area').innerHTML = html;
-    }
-
-    // Start pipeline (with UI feedback)
-    async function startPipeline() {
-      const btn = document.getElementById('btn-run');
-      const original = btn.innerText;
-      try {
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Iniciando...';
-        const res = await fetch('/api/run', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ nrows: 50, to_db: true })
-        });
-        if (!res.ok) throw new Error('Falha ao iniciar pipeline');
-        // mostra notificação simples
-        alert('Pipeline iniciado em background. Aguarde e atualize KPIs em alguns segundos.');
-      } catch (e) {
-        alert('Erro ao iniciar pipeline: ' + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = original;
-      }
-    }
-
-    // Gera export no servidor e mostra link para download
-    async function exportCsv() {
-      const btn = document.getElementById('btn-export');
-      const original = btn.innerText;
-      try {
-        btn.disabled = true;
-        btn.innerHTML = 'Gerando...';
-        const j = await fetchJson('/api/export');
-        if (!j || j.error) {
-          alert('Erro ao gerar export: ' + (j?.error || 'unknown'));
-          return;
-        }
-        // atualiza link direto para rota de download
-        const link = document.getElementById('link-csv');
-        link.href = '/download/export';
-        link.classList.remove('d-none');
-        link.innerText = `Download CSV (${j.rows} linhas)`;
-        alert('Export gerado: ' + j.path);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = original;
-      }
-    }
-
-    // Polling de KPIs a cada X segundos (auto-refresh)
-    const POLL_INTERVAL = 8000; // 8s
-    let pollHandle = null;
-    function startPolling() {
-      if (pollHandle) clearInterval(pollHandle);
-      pollHandle = setInterval(async () => {
-        await loadStats();
-        await loadTable();
-      }, POLL_INTERVAL);
-    }
-
-    // Event bindings
-    document.getElementById('btn-run').addEventListener('click', startPipeline);
-    document.getElementById('btn-export').addEventListener('click', exportCsv);
-
-    // Inicia carregamento inicial e polling
-    loadStats();
-    loadTable();
-    startPolling();
+    AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic' });
+    window.addEventListener('scroll', ()=>{ document.getElementById('topbar').classList.toggle('scrolled', window.scrollY>24); });
   </script>
 
+  <!-- App JS (praticamente o mesmo que já usa, adaptei para search e estilos) -->
+  <script>
+  const API = {
+    stats: '/api/stats',
+    reviews: (limit=100, offset=0)=>`/api/reviews?limit=${limit}&offset=${offset}`,
+    export: '/api/export',
+    run: '/api/run',
+    download: '/download/export'
+  };
+
+  async function fetchJson(url){
+    const r = await fetch(url);
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  }
+
+  async function fetchReviewsPage(pageIdx=0, pageSize=50){
+    const offset = pageIdx * pageSize;
+    const url = `/api/reviews?limit=${pageSize}&offset=${offset}`;
+    const res = await fetch(url);
+    if(!res.ok) return [];
+    return await res.json();
+  }
+
+  async function fetchReviewsAll(limit=1000){
+    const res = await fetch(`/api/reviews?limit=${limit}&offset=0`);
+    if(!res.ok) return [];
+    return await res.json();
+  }
+
+  let charts = {}, page = 0, lastFetched = [];
+
+  function topNMap(arr, n=10){
+    const counts = {};
+    for(const x of arr){ if(!x) continue; counts[x] = (counts[x]||0)+1; }
+    return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,n);
+  }
+
+  async function renderKPIs(){
+    try{
+      const s = await fetchJson(API.stats);
+      document.getElementById('kpi-total').innerText = s.total ?? '—';
+      document.getElementById('kpi-avg').innerText = s.avg_rating ? Number(s.avg_rating).toFixed(2) : '—';
+      document.getElementById('kpi-pos').innerText = s.pct_pos ? Number(s.pct_pos).toFixed(1)+'%' : '—';
+      document.getElementById('kpi-neg').innerText = s.pct_neg ? Number(s.pct_neg).toFixed(1)+'%' : '—';
+    }catch(e){ console.warn('KPIs:', e); }
+  }
+
+  async function renderCharts(){
+    try{
+      const limit = Number(document.getElementById('select-limit').value || 1000);
+      const reviews = await fetchReviewsAll(limit);
+      lastFetched = reviews;
+      const sentiments = reviews.map(r=>r.sentiment||'unknown');
+      const ratings = reviews.map(r=>Math.round(Number(r.rating)||0));
+      const keywords = reviews.flatMap(r => (r.keywords||'').split(',').map(s=>s.trim()).filter(Boolean));
+      const times = reviews.map(r => r.review_date ? new Date(r.review_date) : null).filter(Boolean);
+
+      // Sentiment -> doughnut
+      const sentMap = Object.fromEntries(topNMap(sentiments, 6).map(i=>[i[0], i[1]]));
+      const sentLabels = Object.keys(sentMap);
+      const sentData = sentLabels.map(l=>sentMap[l]);
+      const ctxSent = document.getElementById('chart-sentiment').getContext('2d');
+      if(charts.sent) charts.sent.destroy();
+      charts.sent = new Chart(ctxSent, { type:'doughnut', data:{ labels:sentLabels, datasets:[{ data:sentData }]}, options:{ plugins:{ legend:{ position:'bottom' } } } });
+
+      // Rating distribution -> bar
+      const counts = {};
+      for(const r of ratings) counts[r] = (counts[r]||0)+1;
+      const allRatings = [1,2,3,4,5];
+      const ratingVals = allRatings.map(l=>counts[l]||0);
+      const ctxRating = document.getElementById('chart-rating').getContext('2d');
+      if(charts.rating) charts.rating.destroy();
+      charts.rating = new Chart(ctxRating, { type:'bar', data:{ labels: allRatings.map(String), datasets:[{ label:'Qtd', data: ratingVals }]}, options:{ scales:{ y:{ beginAtZero:true }}, plugins:{ legend:{ display:false } } } });
+
+      // Top products -> horizontal bar
+      const prodMap = topNMap(reviews.map(r=>r.product_id), 8);
+      const prodLabels = prodMap.map(i=>i[0]); const prodValues = prodMap.map(i=>i[1]);
+      const ctxProd = document.getElementById('chart-top-products').getContext('2d');
+      if(charts.prod) charts.prod.destroy();
+      charts.prod = new Chart(ctxProd, { type:'bar', data:{ labels: prodLabels, datasets:[{ data:prodValues }]}, options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true } } } });
+
+      // Keywords -> horizontal bar
+      const kwMap = topNMap(keywords, 10); const kwLabels = kwMap.map(i=>i[0]); const kwValues = kwMap.map(i=>i[1]);
+      const ctxKw = document.getElementById('chart-keywords').getContext('2d');
+      if(charts.kw) charts.kw.destroy();
+      charts.kw = new Chart(ctxKw, { type:'bar', data:{ labels: kwLabels, datasets:[{ data:kwValues }]}, options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true } } } });
+
+      // Timeseries
+      const byMonth = {};
+      for(const d of times){ const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; byMonth[key] = (byMonth[key]||0)+1; }
+      const months = Object.keys(byMonth).sort(); const countsMonth = months.map(m=>byMonth[m]);
+      const ctxTime = document.getElementById('chart-timeseries').getContext('2d');
+      if(charts.time) charts.time.destroy();
+      charts.time = new Chart(ctxTime, { type:'line', data:{ labels: months, datasets:[{ label:'Reviews', data: countsMonth, tension:0.25, fill:true }]}, options:{ scales:{ y:{ beginAtZero:true } }, plugins:{ legend:{ display:false } } } });
+
+      // populate products select
+      const prodSel = document.getElementById('select-product');
+      const prods = [...new Set(reviews.map(r=>r.product_id))].slice(0,200);
+      const prev = prodSel.value;
+      prodSel.innerHTML = '<option value="__all__">Todos os produtos</option>' + prods.map(p=>`<option value="${p}">${p}</option>`).join('');
+      if(prods.includes(prev) || prev==='__all__') prodSel.value = prev;
+    }catch(e){ console.error('renderCharts error', e); }
+  }
+
+  async function renderTable(){
+    const pageSize = Number(document.getElementById('page-size').value || 50);
+    const rows = await fetchReviewsPage(page, pageSize);
+    const tbody = document.querySelector('#reviews-table tbody');
+    const q = document.getElementById('search-box').value.trim().toLowerCase();
+    const filtered = rows.filter(r => {
+      if(!q) return true;
+      return (r.review_id||'').toLowerCase().includes(q) ||
+             (r.product_id||'').toLowerCase().includes(q) ||
+             (r.review_text||'').toLowerCase().includes(q);
+    });
+    tbody.innerHTML = filtered.map(r => `
+      <tr>
+        <td style="max-width:200px;word-break:break-word">${r.review_id}</td>
+        <td>${r.product_id}</td>
+        <td>${r.rating}</td>
+        <td>${r.sentiment}</td>
+        <td>${(r.keywords||'').slice(0,80)}</td>
+        <td>${(r.review_text||'').substring(0,160)}</td>
+      </tr>
+    `).join('');
+    document.getElementById('table-info').innerText = `Página ${page+1} • Mostrando ${filtered.length} reviews (tamanho ${pageSize})`;
+    document.getElementById('prev-page').disabled = (page <= 0);
+    document.getElementById('next-page').disabled = (rows.length < pageSize);
+  }
+
+  // UI bindings
+  document.getElementById('btn-export')?.addEventListener('click', genExportUI);
+  document.getElementById('run-pipeline-hero')?.addEventListener('click', runPipelineUI);
+  document.getElementById('cta-export-hero')?.addEventListener('click', genExportUI);
+
+  document.getElementById('select-limit')?.addEventListener('change', ()=>{ renderCharts(); renderKPIs(); });
+  document.getElementById('select-product')?.addEventListener('change', ()=>{ renderCharts(); renderTable(); });
+  document.getElementById('page-size')?.addEventListener('change', ()=>{ page=0; renderTable(); });
+
+  document.getElementById('prev-page').addEventListener('click', ()=>{ if(page>0){ page--; renderTable(); }});
+  document.getElementById('next-page').addEventListener('click', ()=>{ page++; renderTable(); });
+
+  document.getElementById('search-box')?.addEventListener('input', ()=>{ page=0; renderTable(); });
+
+  async function runPipelineUI(){
+    const b = document.getElementById('run-pipeline-hero');
+    if(b) { b.disabled = true; b.innerText = 'Iniciando...'; }
+    try{
+      await fetch(API.run, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nrows:1000,to_db:true}) });
+      alert('Pipeline iniciado. Aguarde alguns segundos e atualize os dados.');
+      setTimeout(()=>{ renderKPIs(); renderCharts(); renderTable(); }, 1600);
+    }catch(e){ alert('Erro ao iniciar pipeline: '+e.message); }
+    if(b) { b.disabled = false; b.innerText = 'Run Pipeline'; }
+  }
+
+  async function genExportUI(){
+    const b = document.getElementById('btn-export') || document.getElementById('cta-export-hero');
+    if(b){ b.disabled = true; b.innerText = 'Gerando...'; }
+    try{
+      const r = await fetch(API.export);
+      const j = await r.json();
+      if(j && j.path){
+        document.getElementById('link-csv').classList.remove('d-none');
+        alert('Export gerado: '+j.path);
+      } else {
+        alert('Falha ao gerar export');
+      }
+    }catch(e){ alert('Erro: '+e.message); }
+    if(b){ b.disabled = false; b.innerText = 'Gerar Export'; }
+  }
+
+  (async function init(){
+    await renderKPIs();
+    await renderCharts();
+    await renderTable();
+    setInterval(renderKPIs, 12000);
+  })();
+  </script>
+
+  <!-- Bootstrap bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

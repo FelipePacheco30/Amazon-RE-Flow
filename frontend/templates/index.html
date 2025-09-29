@@ -377,7 +377,7 @@
   </script>
 
   <!-- App JS (praticamente o mesmo que já usa, adaptei para search e estilos) -->
-  <script>
+<script>
   const API = {
     stats: '/api/stats',
     reviews: (limit=100, offset=0)=>`/api/reviews?limit=${limit}&offset=${offset}`,
@@ -392,25 +392,36 @@
     return await r.json();
   }
 
+  // Normaliza a resposta: aceita array OR { total, rows }
+  function normalizeListResponse(j){
+    if(!j) return { total: 0, rows: [] };
+    if(Array.isArray(j)) return { total: j.length, rows: j };
+    if(j.rows && Array.isArray(j.rows)) return { total: j.total ?? j.rows.length, rows: j.rows };
+    // se veio um object com dados compactados
+    return { total: j.total ?? 0, rows: j.rows ?? [] };
+  }
+
   async function fetchReviewsPage(pageIdx=0, pageSize=50){
     const offset = pageIdx * pageSize;
     const url = `/api/reviews?limit=${pageSize}&offset=${offset}`;
     const res = await fetch(url);
-    if(!res.ok) return [];
-    return await res.json();
+    if(!res.ok) return { total:0, rows: [] };
+    const j = await res.json();
+    return normalizeListResponse(j);
   }
 
   async function fetchReviewsAll(limit=1000){
     const res = await fetch(`/api/reviews?limit=${limit}&offset=0`);
-    if(!res.ok) return [];
-    return await res.json();
+    if(!res.ok) return { total:0, rows: [] };
+    const j = await res.json();
+    return normalizeListResponse(j);
   }
 
-  let charts = {}, page = 0, lastFetched = [];
+  let charts = {}, page = 0, lastFetched = { total:0, rows:[] };
 
   function topNMap(arr, n=10){
     const counts = {};
-    for(const x of arr){ if(!x) continue; counts[x] = (counts[x]||0)+1; }
+    for(const x of arr){ if(!x && x!==0) continue; counts[x] = (counts[x]||0)+1; }
     return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,n);
   }
 
@@ -427,8 +438,10 @@
   async function renderCharts(){
     try{
       const limit = Number(document.getElementById('select-limit').value || 1000);
-      const reviews = await fetchReviewsAll(limit);
-      lastFetched = reviews;
+      const all = await fetchReviewsAll(limit);
+      const reviews = all.rows;
+      lastFetched = all;
+      // garante array
       const sentiments = reviews.map(r=>r.sentiment||'unknown');
       const ratings = reviews.map(r=>Math.round(Number(r.rating)||0));
       const keywords = reviews.flatMap(r => (r.keywords||'').split(',').map(s=>s.trim()).filter(Boolean));
@@ -483,7 +496,8 @@
 
   async function renderTable(){
     const pageSize = Number(document.getElementById('page-size').value || 50);
-    const rows = await fetchReviewsPage(page, pageSize);
+    const resp = await fetchReviewsPage(page, pageSize);
+    const rows = resp.rows || [];
     const tbody = document.querySelector('#reviews-table tbody');
     const q = document.getElementById('search-box').value.trim().toLowerCase();
     const filtered = rows.filter(r => {
@@ -525,10 +539,12 @@
     const b = document.getElementById('run-pipeline-hero');
     if(b) { b.disabled = true; b.innerText = 'Iniciando...'; }
     try{
-      await fetch(API.run, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nrows:1000,to_db:true}) });
+      // NÃO enviar nrows por padrão (evita sobrescrever DB com amostras).
+      await fetch(API.run, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ to_db:true }) });
       alert('Pipeline iniciado. Aguarde alguns segundos e atualize os dados.');
-      setTimeout(()=>{ renderKPIs(); renderCharts(); renderTable(); }, 1600);
-    }catch(e){ alert('Erro ao iniciar pipeline: '+e.message); }
+      // esperar um pouco mais para o job finalizar => dar tempo de escrita no DB
+      setTimeout(()=>{ renderKPIs(); renderCharts(); renderTable(); }, 4000);
+    }catch(e){ alert('Erro ao iniciar pipeline: '+(e.message||e)); }
     if(b) { b.disabled = false; b.innerText = 'Run Pipeline'; }
   }
 
@@ -544,7 +560,7 @@
       } else {
         alert('Falha ao gerar export');
       }
-    }catch(e){ alert('Erro: '+e.message); }
+    }catch(e){ alert('Erro: '+(e.message||e)); }
     if(b){ b.disabled = false; b.innerText = 'Gerar Export'; }
   }
 
@@ -554,7 +570,9 @@
     await renderTable();
     setInterval(renderKPIs, 12000);
   })();
-  </script>
+</script>
+
+
 
   <!-- Bootstrap bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

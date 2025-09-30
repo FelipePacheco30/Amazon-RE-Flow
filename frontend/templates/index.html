@@ -1,10 +1,9 @@
-<!-- frontend/templates/index.html -->
 <!doctype html>
 <html lang="pt-br">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Amazon Reviews Dashboard — ETL & NLP</title>
+  <title>Amazon Re-Flow</title>
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -19,129 +18,187 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <style>
+    /* ---------- Theme variables ---------- */
     :root{
       --accent-orange: #FF9900;   /* Amazon-like orange */
-      --accent-dark: #131921;     /* deep dark */
+      --accent-dark: #0b2545;     /* deep dark */
       --muted: #6b7280;
-      --bg-1: linear-gradient(135deg,#0f172a 0%, #0b2545 60%);
-      --card-shadow: 0 12px 30px rgba(11,37,69,0.06);
-      --section-title-bg: linear-gradient(90deg, rgba(255,153,0,0.95), rgba(255,120,0,0.95));
-      --footer-grad: linear-gradient(90deg,#131921 0%, #0b2545 100%);
+      --bg-surface: #ffffff;
+      --glass: rgba(255,255,255,0.6);
+      --glass-strong: rgba(11,37,69,0.06);
+      --accent-grad: linear-gradient(135deg,#FF9900 0%, #ff6a00 100%);
+      --card-shadow: 0 10px 30px rgba(11,37,69,0.06);
+      --glass-blur: 10px;
     }
 
-    html { scroll-behavior: smooth; }
+    /* allow anchor scrolling to account for sticky topbar */
+    html { scroll-behavior: smooth; scroll-padding-top: 86px; }
+
+    /* ---------- Base ---------- */
     body {
       font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      margin: 0; color: var(--accent-dark);
-      background: linear-gradient(180deg,#fbfdff 0%, #f6f8fb 100%);
+      margin: 0; color: #0f172a;
+      background: radial-gradient(1200px 400px at 10% 10%, rgba(139,92,246,0.04), transparent 8%),
+                  linear-gradient(180deg,#fbfdff 0%, #f4f7fb 100%);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
 
-    /* Topbar */
+    a { text-decoration: none; }
+
+    /* ---------- Topbar (frosted) - sits at the very top ---------- */
     .topbar {
-      position: sticky; top: 0; z-index: 9999;
-      background: var(--accent-dark);
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-      box-shadow: 0 6px 20px rgba(19,25,33,0.06);
+      position: sticky;
+      top: 0;                /* moved to top to remove white gap */
+      z-index: 9999;
+      margin: 0 12px;        /* keep horizontal breathing */
+      border-radius:12px;
+      background: rgba(11,37,69,0.90);
+      backdrop-filter: blur(6px) saturate(120%);
+      border: 1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 8px 30px rgba(2,6,23,0.12);
     }
     .topbar .navbar-brand { color: #fff !important; display:flex; gap:.6rem; align-items:center; }
-    .topbar .nav-link { color: rgba(255,255,255,0.95) !important; font-weight:600; margin-left:6px; }
-    .topbar .nav-link:hover { color: #fff !important; opacity:0.95; text-decoration:underline; }
-    .topbar .navbar-toggler { border-color: rgba(255,255,255,0.2); }
+    .topbar .nav-link { color: rgba(255,255,255,0.92) !important; font-weight:600; margin-left:6px; }
+    .topbar .nav-link:hover { color: #fff !important; opacity:0.98; }
+    .topbar .navbar-toggler { border-color: rgba(255,255,255,0.12); }
+    .topbar .navbar-toggler-icon{ filter: invert(1); }
 
-    /* HERO / ABOUT - first and informative */
+    /* active nav link (section visible) */
+    .navbar .nav-link.active { color: var(--accent-orange) !important; text-decoration: underline; text-underline-offset:4px; }
+
+    /* ---------- Hero ---------- */
     .hero-about {
-      min-height: 80vh;
-      display:flex; align-items:center;
-      color: white;
-      background: radial-gradient(1200px 400px at 10% 20%, rgba(255,153,0,0.10), transparent 8%),
-                  linear-gradient(135deg,#0b2545 10%, #0f172a 60%);
-      position:relative; overflow:hidden;
+      min-height: 78vh; display:flex; align-items:center; position:relative; overflow:hidden;
+      color: white; padding:64px 0 28px;    /* increased top padding so topbar doesn't overlap content */
     }
-    .hero-shape {
-      position:absolute; right:-10%; top:-10%; width:60%; height:120%;
-      background: linear-gradient(120deg, rgba(139,92,246,0.18), rgba(6,182,212,0.12));
-      transform: rotate(18deg); filter: blur(48px); opacity:0.9;
-      pointer-events:none;
+    .hero-inner { position:relative; z-index:3; }
+    .hero-backdrop {
+      position:absolute; inset:0; background: radial-gradient(800px 400px at 85% 10%, rgba(255,153,0,0.06), transparent 12%),
+                 linear-gradient(135deg,#0b2545 0%, #07122b 60%);
+      transform: translateY(-4%); filter: blur(8px);
+      z-index:1;
     }
-    .brand-mark {
-      width:96px; height:96px; border-radius:16px;
-      background: linear-gradient(135deg,var(--accent-orange), #ff6a00);
-      display:flex; align-items:center; justify-content:center; font-weight:800; font-size:30px;
-      color:white; box-shadow: 0 12px 36px rgba(255,153,0,0.14);
+    .hero-glow {
+      position:absolute; right:-8%; top:-6%; width:46%; height:120%;
+      background: linear-gradient(120deg, rgba(139,92,246,0.12), rgba(6,182,212,0.08));
+      transform: rotate(18deg); filter: blur(44px); opacity:0.95; z-index:2;
     }
+
     .hero h1 {
       font-family:"Playfair Display", serif;
-      font-weight:700; font-size: clamp(26px, 4.8vw, 48px); margin:0;
-      letter-spacing:-0.01em;
+      font-weight:700; font-size: clamp(28px, 4.8vw, 52px); margin:0 0 6px 0;
+      letter-spacing:-0.02em; line-height:1.02;
     }
-    .hero p.lead { color: rgba(255,255,255,0.95); margin-top:12px; font-size:1.05rem; }
+    .hero p.lead { color: rgba(255,255,255,0.93); margin-top:12px; font-size:1.05rem; }
 
-    .cta-row .btn { min-width:150px; border-radius:10px; }
+    .cta-row .btn { min-width:150px; border-radius:12px; font-weight:700; }
+    .btn-accent { background: linear-gradient(90deg,#ff8a00,#ff6a00); border: none; color: #fff; }
+    .btn-ghost { background: rgba(255,255,255,0.08); color: #fff; border-radius:12px; border:1px solid rgba(255,255,255,0.06); }
 
-    .wave { display:block; width:100%; height:72px; overflow:hidden; line-height:0; }
-    .wave svg { width:100%; height:100%; }
+    .hero-meta { margin-top:14px; color: rgba(255,255,255,0.8); font-size:0.95rem; }
 
-    /* Section Titles (orange blocks, centered) */
+    /* hero-impact (novo bloco centralizado, controla proporção) */
+    .hero-impact {
+      max-width: 720px;
+      padding: 28px;
+      text-align: center;
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      box-shadow: 0 10px 30px rgba(2,6,23,0.12);
+    }
+    .hero-impact h2 { font-size: clamp(22px, 3.2vw, 36px); font-weight:900; margin-bottom:10px; line-height:1.02; }
+    .hero-highlight {
+      background: linear-gradient(90deg,#ff9900,#ff7b00);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight:900;
+    }
+
+    /* ---------- Section title pill ---------- */
     .section-title {
-      display:flex; align-items:center; justify-content:center;
-      background: var(--section-title-bg);
-      color:#fff; padding:10px 18px; border-radius:10px;
-      box-shadow: 0 6px 18px rgba(255,153,0,0.10); margin-bottom:18px;
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      background: linear-gradient(90deg, rgba(255,153,0,0.98), rgba(255,120,0,0.98));
+      color:#fff; padding:10px 18px; border-radius:999px; box-shadow: 0 8px 30px rgba(255,153,0,0.12); margin-bottom:18px;
       font-weight:700; letter-spacing:0.02em;
     }
 
     section { padding:44px 0; }
-    .section-card { background: white; border-radius:12px; padding:18px; box-shadow: var(--card-shadow); }
+    .section-card { background: var(--bg-surface); border-radius:14px; padding:18px; box-shadow: var(--card-shadow); }
 
+    /* ---------- KPI cards with subtle glass ---------- */
+    .kpi-card { padding:18px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,250,0.85)); border: 1px solid rgba(11,37,69,0.04); }
+    .kpi-card .small { color:var(--muted); }
+
+    /* ---------- Charts layout improvements ---------- */
     .chart-wrap { height:320px; display:flex; align-items:center; justify-content:center; padding:8px; min-height:220px; }
 
-    /* REVIEWS - stylized */
+    /* ---------- Reviews table ---------- */
     .reviews-panel { background: linear-gradient(180deg,#fff 0%, #fffaf3 100%); border-radius:14px; padding:16px; box-shadow: 0 18px 40px rgba(11,37,69,0.05); }
     .reviews-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
     .reviews-search { max-width:420px; width:100%; }
-    #reviews-table { border-collapse: collapse; }
-    #reviews-table thead th {
-      background: linear-gradient(90deg,var(--accent-orange), #ff7b00);
-      color: #fff; font-weight:700; border:0; vertical-align:middle; position:sticky; top:0; z-index:2;
-    }
-    #reviews-table thead th, #reviews-table tbody td { padding:10px 12px; }
-    #reviews-table tbody tr:nth-child(odd) { background: #fff; }
-    #reviews-table tbody tr:nth-child(even) { background: #fffaf0; }
-    .table-wrap { max-height:520px; overflow:auto; border-radius:8px; }
 
-    .page-btn {
-      border-radius:8px; padding:8px 12px; border:1px solid rgba(0,0,0,0.06); background:#fff;
+    /* modern table */
+    #reviews-table { border-collapse: separate; border-spacing:0 8px; }
+    #reviews-table thead th {
+      background: transparent; color: #374151; font-weight:700; border:0; vertical-align:middle; position:sticky; top:0; z-index:2; padding:8px 12px;
     }
+
+    #reviews-table tbody tr { background: linear-gradient(180deg,#ffffff, #fffefc); border-radius:10px; box-shadow: 0 6px 18px rgba(12,20,30,0.03); }
+    #reviews-table tbody td { padding:14px 12px; vertical-align:middle; }
+    #reviews-table tbody tr td:first-child { font-weight:700; color:#0b2545; }
+
+    .table-wrap { max-height:520px; overflow:auto; border-radius:8px; padding:8px; }
+
+    .page-btn { border-radius:8px; padding:8px 12px; border:1px solid rgba(0,0,0,0.06); background:#fff; }
     .page-btn:disabled { opacity:0.5; cursor:not-allowed; }
 
-    /* Footer */
-    footer.site-footer {
-      padding:28px 0; color:#fff;
-      background: linear-gradient(90deg,#111827 0%, #0b2545 100%);
-      margin-top:22px;
+    /* ---------- Floating run button (keeps same IDs) ---------- */
+    .fab-run {
+      position: fixed; right: 22px; bottom: 22px; z-index:9998; border-radius:999px; padding:12px 18px; box-shadow: 0 12px 36px rgba(11,37,69,0.12);
     }
-    .footer-card { max-width:1100px; margin:0 auto; display:flex; gap:18px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+
+    /* ---------- Footer ---------- */
+    footer.site-footer {
+      padding:28px 0; color:#fff; margin-top:22px;
+      background: linear-gradient(90deg,#0b2545 0%, #07122b 100%);
+    }
+    .footer-card { max-width:1100px; margin:0 auto; display:flex; gap:8px; align-items:center; justify-content:center; flex-direction:column; text-align:center; }
     .footer-brand { display:flex; gap:12px; align-items:center; }
-    .footer-brand .logo { width:46px; height:46px; background:var(--accent-orange); color:#fff; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:800; }
+    .footer-brand .logo { width:56px; height:56px; background:var(--accent-orange); color:#fff; display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:900; }
 
     @media (max-width: 900px){
       .hero { padding:30px 14px; text-align:center; }
       .brand-mark { margin:0 auto 14px; }
       .footer-card { text-align:center; flex-direction:column; gap:8px; }
+      .topbar { margin:8px; }
+      .hero-impact { padding:20px; }
     }
+
+    /* micro-interactions */
+    .section-card:hover { transform: translateY(-3px); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+    .brand-mark { transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+    .brand-mark:hover { transform: translateY(-6px) scale(1.02); }
   </style>
 </head>
 <body id="page-top">
-  <!-- Topbar -->
+  <!-- Topbar (no white gap above) -->
   <nav id="topbar" class="topbar navbar navbar-expand-lg">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center" href="#page-top">
-        <div style="width:40px;height:40px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--accent-orange);font-weight:800;margin-right:10px">AR</div>
-        <div style="font-weight:700;color:#fff">Amazon Reviews Dashboard</div>
+        <div class="topbar-image">
+          <picture>
+            <source srcset="../static/img/awslogo.png" type="image/webp">
+            <img id="brand-image" src="../static/img/awslogo.png" alt="Seu logo" style="height:44px;border-radius:8px;margin-right:12px;"
+                 onerror="this.onerror=null; this.style.display='none'; console.warn('Logo não encontrado: /static/img/awslogo.png');">
+          </picture>
+        </div>
+        <div style="font-weight:800;color:#fff;letter-spacing:0.2px">Amazon Re-Flow</div>
       </a>
 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-        <span class="navbar-toggler-icon" style="filter: invert(1)"></span>
+        <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse justify-content-end" id="navMenu">
@@ -157,44 +214,38 @@
   </nav>
 
   <!-- HERO / ABOUT -->
-  <header class="hero-about" id="about">
-    <div class="hero-shape" aria-hidden="true"></div>
+  <header class="hero-about" id="about" role="banner">
+    <div class="hero-backdrop" aria-hidden="true"></div>
+    <div class="hero-glow" aria-hidden="true"></div>
+
     <div class="container hero-inner" >
       <div class="row align-items-center">
         <div class="col-lg-6" data-aos="fade-right">
-          <div class="brand-mark">AR</div>
-          <h1 class="mt-3">Dashboard de análises de reviews — ETL + NLP</h1>
-          <p class="lead">Pipeline completo: extração dos dados, limpeza (transform), análise de sentimento (NLP) e visualizações interativas. Rode a pipeline local, explore métricas e exporte CSV para uso em dashboards.</p>
+          <img id="hero-logo" src="../static/img/amazonrevlogo.png" alt="Logo" style="max-width:180px;display:block;margin-bottom:12px;"
+               onerror="this.onerror=null; this.style.display='none'; console.warn('Imagem do hero não encontrada: /static/img/amazonrevlogo.png');">
+          <h1 class="mt-3">Dashboard de análises de reviews</h1>
+          <p class="lead">Pipeline completo: extração, limpeza, análise de sentimento e visualizações interativas. Explore métricas e exporte CSV para dashboards.</p>
 
           <div class="mt-4 d-flex gap-2 cta-row">
-            <button id="run-pipeline-hero" class="btn btn-dark btn-lg">Run Pipeline</button>
-            <button id="cta-export-hero" class="btn btn-outline-light btn-lg">Generate Export</button>
+            <button id="run-pipeline-hero" class="btn btn-accent btn-lg">Iniciar Análise</button>
+            <button id="cta-export-hero" class="btn btn-ghost btn-lg">Gerar CSV</button>
           </div>
 
-          <ul class="list-inline mt-4 text-white-50 small">
-            <li class="list-inline-item">Local ETL • SQLite</li>
-            <li class="list-inline-item">NLTK VADER • Keywords</li>
-            <li class="list-inline-item">Charts interativos</li>
-          </ul>
+          <div class="hero-meta">Explore insights claros e visuais — para ajudar você a entender o que importa.</div>
         </div>
 
-        <div class="col-lg-6" data-aos="fade-left">
-          <div class="section-card">
-            <h5 style="margin-top:0">Fluxo de dados</h5>
-            <ol>
-              <li><strong>Extract:</strong> leitura do CSV bruto.</li>
-              <li><strong>Transform:</strong> limpeza, colunas renomeadas, remoção de ruído.</li>
-              <li><strong>NLP:</strong> clean_text, sentiment (VADER), top keywords.</li>
-              <li><strong>Load:</strong> salvamento em SQLite e export CSV para dashboards.</li>
-            </ol>
-            <div class="small text-muted">Use os botões para executar a pipeline e gerar/exportar dados.</div>
+        <!-- Substituí o card por um bloco centralizado e equilibrado -->
+        <div class="col-lg-6 d-flex align-items-center justify-content-center" data-aos="fade-left">
+          <div class="hero-impact" role="complementary" aria-hidden="false">
+            <h2>Transforme feedback em <span class="hero-highlight">insights</span> que geram ação</h2>
+            <p class="lead" style="color:rgba(255,255,255,0.92); margin-bottom:0;">Identifique o que importa, priorize melhorias e compartilhe resultados em um clique — simples, direto e visual.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="wave" aria-hidden="true" style="position:absolute;left:0;right:0;bottom:-1px;">
-      <svg viewBox="0 0 1200 72" preserveAspectRatio="none"><path d="M0,0 C300,72 600,72 1200,0 L1200,72 L0,72 Z" fill="#ffffff" opacity="0.96"></path></svg>
+    <div class="wave" aria-hidden="true" style="position:absolute;left:0;right:0;bottom:-1px;z-index:2;">
+      <svg viewBox="0 0 1200 72" preserveAspectRatio="none"><path d="M0,0 C300,72 600,72 1200,0 L1200,72 L0,72 Z" fill="#ffffff" opacity="0.98"></path></svg>
     </div>
   </header>
 
@@ -219,25 +270,25 @@
 
       <div class="row g-3">
         <div class="col-md-3">
-          <div class="section-card text-center py-3">
+          <div class="section-card kpi-card text-center py-3">
             <div class="small text-muted">Total reviews</div>
             <div id="kpi-total" class="h3 fw-bold">—</div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="section-card text-center py-3">
+          <div class="section-card kpi-card text-center py-3">
             <div class="small text-muted">Avg rating</div>
             <div id="kpi-avg" class="h3 fw-bold">—</div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="section-card text-center py-3">
+          <div class="section-card kpi-card text-center py-3">
             <div class="small text-muted">Positive</div>
             <div id="kpi-pos" class="h3 fw-bold">—</div>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="section-card text-center py-3">
+          <div class="section-card kpi-card text-center py-3">
             <div class="small text-muted">Negative</div>
             <div id="kpi-neg" class="h3 fw-bold">—</div>
           </div>
@@ -343,40 +394,34 @@
           <strong>Export CSV</strong><div class="small text-muted">Clique em Gerar e depois em Download</div>
         </div>
         <div>
-          <button id="btn-export" class="btn btn-primary">Gerar Export</button>
+          <button id="btn-export" class="btn btn-primary">Gerar CSV</button>
           <a id="link-csv" class="btn btn-success d-none" href="/download/export" download>Download CSV</a>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- footer -->
   <footer class="site-footer">
     <div class="footer-card container">
-      <div class="footer-brand">
-        <div class="logo">AR</div>
-        <div>
-          <div style="font-weight:800">Amazon Reviews Dashboard</div>
-          <div class="small" style="opacity:.9">ETL • NLP • Visualizações</div>
-        </div>
-      </div>
-
-      <div class="small text-white-50">Feito com dados locais • SQLite • NLTK • Chart.js</div>
-
-      <div style="display:flex;gap:10px;align-items:center">
-        <a class="btn btn-sm" style="background:#fff;color:var(--accent-orange);font-weight:700;border-radius:8px" href="/download/export">Baixar CSV</a>
-        <a class="btn btn-sm btn-outline-light" href="/api/health">Health</a>
-      </div>
+      <div class="small text-white-50">&copy; 2025 — Todos os direitos reservados</div>
     </div>
   </footer>
+
+  <!-- Floating action (keeps same IDs — safe to use) -->
+  <div class="fab-run">
+    <button id="run-pipeline-hero-fab" onclick="document.getElementById('run-pipeline-hero').click()" class="btn btn-accent">Iniciar Análise</button>
+  </div>
 
   <!-- AOS -->
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
   <script>
     AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic' });
-    window.addEventListener('scroll', ()=>{ document.getElementById('topbar').classList.toggle('scrolled', window.scrollY>24); });
+    // small class toggle if scrolled
+    window.addEventListener('scroll', ()=>{ document.getElementById('topbar').classList.toggle('scrolled', window.scrollY>12); });
   </script>
 
-  <!-- App JS (praticamente o mesmo que já usa, adaptei para search e estilos) -->
+  <!-- App JS (mantive a lógica exatamente igual — apenas estilizei a página) -->
 <script>
   const API = {
     stats: '/api/stats',
@@ -539,13 +584,10 @@
     const b = document.getElementById('run-pipeline-hero');
     if(b) { b.disabled = true; b.innerText = 'Iniciando...'; }
     try{
-      // NÃO enviar nrows por padrão (evita sobrescrever DB com amostras).
       await fetch(API.run, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ to_db:true }) });
-      alert('Pipeline iniciado. Aguarde alguns segundos e atualize os dados.');
-      // esperar um pouco mais para o job finalizar => dar tempo de escrita no DB
-      setTimeout(()=>{ renderKPIs(); renderCharts(); renderTable(); }, 4000);
-    }catch(e){ alert('Erro ao iniciar pipeline: '+(e.message||e)); }
-    if(b) { b.disabled = false; b.innerText = 'Run Pipeline'; }
+      console.log('Análise iniciada.');
+      setTimeout(()=>{ renderKPIs(); renderCharts(); renderTable(); if(b){ b.disabled=false; b.innerText='Iniciar Análise'; } }, 4000);
+    }catch(e){ console.error('Erro ao iniciar análise:', e); if(b){ b.disabled=false; b.innerText='Iniciar Análise'; } }
   }
 
   async function genExportUI(){
@@ -556,12 +598,12 @@
       const j = await r.json();
       if(j && j.path){
         document.getElementById('link-csv').classList.remove('d-none');
-        alert('Export gerado: '+j.path);
+        console.log('Export gerado: '+j.path);
       } else {
-        alert('Falha ao gerar export');
+        console.error('Falha ao gerar export');
       }
-    }catch(e){ alert('Erro: '+(e.message||e)); }
-    if(b){ b.disabled = false; b.innerText = 'Gerar Export'; }
+    }catch(e){ console.error('Erro ao gerar export:', e); }
+    if(b){ b.disabled = false; b.innerText = 'Gerar CSV'; }
   }
 
   (async function init(){
@@ -570,11 +612,44 @@
     await renderTable();
     setInterval(renderKPIs, 12000);
   })();
+
+  /* ---------- Nav highlight on scroll ---------- */
+  (function(){
+    const sectionIds = ['about','overview','insights','reviews','export'];
+    const navLinks = Array.from(document.querySelectorAll('.navbar .nav-link'));
+    const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+
+    // when clicking a nav link, close collapsed menu (mobile) and ensure smooth behavior
+    navLinks.forEach(link=>{
+      link.addEventListener('click', (e)=>{
+        // collapse mobile menu if open
+        const bsCollapse = document.querySelector('#navMenu.collapse.show');
+        if(bsCollapse) {
+          const collapse = bootstrap.Collapse.getInstance(bsCollapse) || new bootstrap.Collapse(bsCollapse);
+          collapse.hide();
+        }
+      });
+    });
+
+    const obs = new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        const id = entry.target.id;
+        const link = document.querySelector('.navbar .nav-link[href="#'+id+'"]');
+        if(link){
+          if(entry.isIntersecting && entry.intersectionRatio > 0.45){
+            navLinks.forEach(n=>n.classList.remove('active'));
+            link.classList.add('active');
+          }
+        }
+      });
+    }, { threshold: [0.45] });
+
+    sections.forEach(s=>obs.observe(s));
+  })();
 </script>
-
-
 
   <!-- Bootstrap bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+  

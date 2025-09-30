@@ -1,655 +1,1487 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Amazon Re-Flow</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Amazon Re-Flow</title>
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
-  <!-- AOS (Animate On Scroll) -->
-  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- AOS (Animate On Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-  <style>
-    /* ---------- Theme variables ---------- */
-    :root{
-      --accent-orange: #FF9900;   /* Amazon-like orange */
-      --accent-dark: #0b2545;     /* deep dark */
-      --muted: #6b7280;
-      --bg-surface: #ffffff;
-      --glass: rgba(255,255,255,0.6);
-      --glass-strong: rgba(11,37,69,0.06);
-      --accent-grad: linear-gradient(135deg,#FF9900 0%, #ff6a00 100%);
-      --card-shadow: 0 10px 30px rgba(11,37,69,0.06);
-      --glass-blur: 10px;
-    }
+    <style>
+      /* ---------- Theme variables ---------- */
+      :root {
+        --accent-orange: #ff9900; /* Amazon-like orange */
+        --accent-dark: #0b2545; /* deep dark */
+        --muted: #6b7280;
+        --bg-surface: #ffffff;
+        --glass: rgba(255, 255, 255, 0.6);
+        --glass-strong: rgba(11, 37, 69, 0.06);
+        --accent-grad: linear-gradient(135deg, #ff9900 0%, #ff6a00 100%);
+        --card-shadow: 0 10px 30px rgba(11, 37, 69, 0.06);
+        --glass-blur: 10px;
+      }
 
-    /* allow anchor scrolling to account for sticky topbar */
-    html { scroll-behavior: smooth; scroll-padding-top: 86px; }
+      /* allow anchor scrolling to account for sticky topbar */
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 86px;
+      }
 
-    /* ---------- Base ---------- */
-    body {
-      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      margin: 0; color: #0f172a;
-      background: radial-gradient(1200px 400px at 10% 10%, rgba(139,92,246,0.04), transparent 8%),
-                  linear-gradient(180deg,#fbfdff 0%, #f4f7fb 100%);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
+      /* ---------- Base ---------- */
+      body {
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+        margin: 0;
+        color: #0f172a;
+        background: radial-gradient(
+            1200px 400px at 10% 10%,
+            rgba(139, 92, 246, 0.04),
+            transparent 8%
+          ),
+          linear-gradient(180deg, #fbfdff 0%, #f4f7fb 100%);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
 
-    a { text-decoration: none; }
+      a {
+        text-decoration: none;
+      }
 
-    /* ---------- Topbar (frosted) - sits at the very top ---------- */
-    .topbar {
-      position: sticky;
-      top: 0;                /* moved to top to remove white gap */
-      z-index: 9999;
-      margin: 0 12px;        /* keep horizontal breathing */
-      border-radius:12px;
-      background: rgba(11,37,69,0.90);
-      backdrop-filter: blur(6px) saturate(120%);
-      border: 1px solid rgba(255,255,255,0.04);
-      box-shadow: 0 8px 30px rgba(2,6,23,0.12);
-    }
-    .topbar .navbar-brand { color: #fff !important; display:flex; gap:.6rem; align-items:center; }
-    .topbar .nav-link { color: rgba(255,255,255,0.92) !important; font-weight:600; margin-left:6px; }
-    .topbar .nav-link:hover { color: #fff !important; opacity:0.98; }
-    .topbar .navbar-toggler { border-color: rgba(255,255,255,0.12); }
-    .topbar .navbar-toggler-icon{ filter: invert(1); }
+      /* ---------- Topbar (frosted) - sits at the very top ---------- */
+      .topbar {
+        position: sticky;
+        top: 0; /* moved to top to remove white gap */
+        z-index: 9999;
+        margin: 0 12px; /* keep horizontal breathing */
+        border-radius: 12px;
+        background: rgba(11, 37, 69, 0.9);
+        backdrop-filter: blur(6px) saturate(120%);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        box-shadow: 0 8px 30px rgba(2, 6, 23, 0.12);
+      }
+      .topbar .navbar-brand {
+        color: #fff !important;
+        display: flex;
+        gap: 0.6rem;
+        align-items: center;
+      }
+      .topbar .nav-link {
+        color: rgba(255, 255, 255, 0.92) !important;
+        font-weight: 600;
+        margin-left: 6px;
+      }
+      .topbar .nav-link:hover {
+        color: #fff !important;
+        opacity: 0.98;
+      }
+      .topbar .navbar-toggler {
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+      .topbar .navbar-toggler-icon {
+        filter: invert(1);
+      }
 
-    /* active nav link (section visible) */
-    .navbar .nav-link.active { color: var(--accent-orange) !important; text-decoration: underline; text-underline-offset:4px; }
+      /* active nav link (section visible) */
+      .navbar .nav-link.active {
+        color: var(--accent-orange) !important;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+      }
 
-    /* ---------- Hero ---------- */
-    .hero-about {
-      min-height: 78vh; display:flex; align-items:center; position:relative; overflow:hidden;
-      color: white; padding:64px 0 28px;    /* increased top padding so topbar doesn't overlap content */
-    }
-    .hero-inner { position:relative; z-index:3; }
-    .hero-backdrop {
-      position:absolute; inset:0; background: radial-gradient(800px 400px at 85% 10%, rgba(255,153,0,0.06), transparent 12%),
-                 linear-gradient(135deg,#0b2545 0%, #07122b 60%);
-      transform: translateY(-4%); filter: blur(8px);
-      z-index:1;
-    }
-    .hero-glow {
-      position:absolute; right:-8%; top:-6%; width:46%; height:120%;
-      background: linear-gradient(120deg, rgba(139,92,246,0.12), rgba(6,182,212,0.08));
-      transform: rotate(18deg); filter: blur(44px); opacity:0.95; z-index:2;
-    }
+      /* ---------- Hero ---------- */
+      .hero-about {
+        min-height: 78vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        color: white;
+        padding: 64px 0 28px; /* increased top padding so topbar doesn't overlap content */
+      }
+      .hero-inner {
+        position: relative;
+        z-index: 3;
+      }
+      .hero-backdrop {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+            800px 400px at 85% 10%,
+            rgba(255, 153, 0, 0.06),
+            transparent 12%
+          ),
+          linear-gradient(135deg, #0b2545 0%, #07122b 60%);
+        transform: translateY(-4%);
+        filter: blur(8px);
+        z-index: 1;
+      }
+      .hero-glow {
+        position: absolute;
+        right: -8%;
+        top: -6%;
+        width: 46%;
+        height: 120%;
+        background: linear-gradient(
+          120deg,
+          rgba(139, 92, 246, 0.12),
+          rgba(6, 182, 212, 0.08)
+        );
+        transform: rotate(18deg);
+        filter: blur(44px);
+        opacity: 0.95;
+        z-index: 2;
+      }
 
-    .hero h1 {
-      font-family:"Playfair Display", serif;
-      font-weight:700; font-size: clamp(28px, 4.8vw, 52px); margin:0 0 6px 0;
-      letter-spacing:-0.02em; line-height:1.02;
-    }
-    .hero p.lead { color: rgba(255,255,255,0.93); margin-top:12px; font-size:1.05rem; }
+      .hero h1 {
+        font-family: "Playfair Display", serif;
+        font-weight: 700;
+        font-size: clamp(28px, 4.8vw, 52px);
+        margin: 0 0 6px 0;
+        letter-spacing: -0.02em;
+        line-height: 1.02;
+      }
+      .hero p.lead {
+        color: rgba(255, 255, 255, 0.93);
+        margin-top: 12px;
+        font-size: 1.05rem;
+      }
 
-    .cta-row .btn { min-width:150px; border-radius:12px; font-weight:700; }
-    .btn-accent { background: linear-gradient(90deg,#ff8a00,#ff6a00); border: none; color: #fff; }
-    .btn-ghost { background: rgba(255,255,255,0.08); color: #fff; border-radius:12px; border:1px solid rgba(255,255,255,0.06); }
+      .cta-row .btn {
+        min-width: 150px;
+        border-radius: 12px;
+        font-weight: 700;
+      }
+      .btn-accent {
+        background: linear-gradient(90deg, #ff8a00, #ff6a00);
+        border: none;
+        color: #fff;
+      }
+      .btn-ghost {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
 
-    .hero-meta { margin-top:14px; color: rgba(255,255,255,0.8); font-size:0.95rem; }
+      .hero-meta {
+        margin-top: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+      }
 
-    /* hero-impact (novo bloco centralizado, controla proporção) */
-    .hero-impact {
-      max-width: 720px;
-      padding: 28px;
-      text-align: center;
-      border-radius: 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      box-shadow: 0 10px 30px rgba(2,6,23,0.12);
-    }
-    .hero-impact h2 { font-size: clamp(22px, 3.2vw, 36px); font-weight:900; margin-bottom:10px; line-height:1.02; }
-    .hero-highlight {
-      background: linear-gradient(90deg,#ff9900,#ff7b00);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      font-weight:900;
-    }
+      /* hero-impact (novo bloco centralizado, controla proporção) */
+      .hero-impact {
+        max-width: 720px;
+        padding: 28px;
+        text-align: center;
+        border-radius: 12px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.03),
+          rgba(255, 255, 255, 0.01)
+        );
+        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
+      }
+      .hero-impact h2 {
+        font-size: clamp(22px, 3.2vw, 36px);
+        font-weight: 900;
+        margin-bottom: 10px;
+        line-height: 1.02;
+      }
+      .hero-highlight {
+        background: linear-gradient(90deg, #ff9900, #ff7b00);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: 900;
+      }
 
-    /* ---------- Section title pill ---------- */
-    .section-title {
-      display:inline-flex; align-items:center; justify-content:center; gap:10px;
-      background: linear-gradient(90deg, rgba(255,153,0,0.98), rgba(255,120,0,0.98));
-      color:#fff; padding:10px 18px; border-radius:999px; box-shadow: 0 8px 30px rgba(255,153,0,0.12); margin-bottom:18px;
-      font-weight:700; letter-spacing:0.02em;
-    }
+      /* ---------- Section title pill ---------- */
+      .section-title {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 153, 0, 0.98),
+          rgba(255, 120, 0, 0.98)
+        );
+        color: #fff;
+        padding: 10px 18px;
+        border-radius: 999px;
+        box-shadow: 0 8px 30px rgba(255, 153, 0, 0.12);
+        margin-bottom: 18px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
 
-    section { padding:44px 0; }
-    .section-card { background: var(--bg-surface); border-radius:14px; padding:18px; box-shadow: var(--card-shadow); }
+      section {
+        padding: 44px 0;
+      }
+      .section-card {
+        background: var(--bg-surface);
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: var(--card-shadow);
+      }
 
-    /* ---------- KPI cards with subtle glass ---------- */
-    .kpi-card { padding:18px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,250,0.85)); border: 1px solid rgba(11,37,69,0.04); }
-    .kpi-card .small { color:var(--muted); }
+      /* ---------- KPI cards with subtle glass ---------- */
+      .kpi-card {
+        padding: 18px;
+        border-radius: 12px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(250, 250, 250, 0.85)
+        );
+        border: 1px solid rgba(11, 37, 69, 0.04);
+      }
+      .kpi-card .small {
+        color: var(--muted);
+      }
 
-    /* ---------- Charts layout improvements ---------- */
-    .chart-wrap { height:320px; display:flex; align-items:center; justify-content:center; padding:8px; min-height:220px; }
+      /* ---------- Charts layout improvements ---------- */
+      .chart-wrap {
+        height: 320px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        min-height: 220px;
+      }
 
-    /* ---------- Reviews table ---------- */
-    .reviews-panel { background: linear-gradient(180deg,#fff 0%, #fffaf3 100%); border-radius:14px; padding:16px; box-shadow: 0 18px 40px rgba(11,37,69,0.05); }
-    .reviews-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
-    .reviews-search { max-width:420px; width:100%; }
+      /* ---------- Reviews table ---------- */
+      .reviews-panel {
+        background: linear-gradient(180deg, #fff 0%, #fffaf3 100%);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 18px 40px rgba(11, 37, 69, 0.05);
+      }
+      .reviews-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .reviews-search {
+        max-width: 420px;
+        width: 100%;
+      }
 
-    /* modern table */
-    #reviews-table { border-collapse: separate; border-spacing:0 8px; }
-    #reviews-table thead th {
-      background: transparent; color: #374151; font-weight:700; border:0; vertical-align:middle; position:sticky; top:0; z-index:2; padding:8px 12px;
-    }
+      /* modern table */
+      #reviews-table {
+        border-collapse: separate;
+        border-spacing: 0 8px;
+      }
+      #reviews-table thead th {
+        background: transparent;
+        color: #374151;
+        font-weight: 700;
+        border: 0;
+        vertical-align: middle;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 8px 12px;
+      }
 
-    #reviews-table tbody tr { background: linear-gradient(180deg,#ffffff, #fffefc); border-radius:10px; box-shadow: 0 6px 18px rgba(12,20,30,0.03); }
-    #reviews-table tbody td { padding:14px 12px; vertical-align:middle; }
-    #reviews-table tbody tr td:first-child { font-weight:700; color:#0b2545; }
+      #reviews-table tbody tr {
+        background: linear-gradient(180deg, #ffffff, #fffefc);
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(12, 20, 30, 0.03);
+      }
+      #reviews-table tbody td {
+        padding: 14px 12px;
+        vertical-align: middle;
+      }
+      #reviews-table tbody tr td:first-child {
+        font-weight: 700;
+        color: #0b2545;
+      }
 
-    .table-wrap { max-height:520px; overflow:auto; border-radius:8px; padding:8px; }
+      .table-wrap {
+        max-height: 520px;
+        overflow: auto;
+        border-radius: 8px;
+        padding: 8px;
+      }
 
-    .page-btn { border-radius:8px; padding:8px 12px; border:1px solid rgba(0,0,0,0.06); background:#fff; }
-    .page-btn:disabled { opacity:0.5; cursor:not-allowed; }
+      .page-btn {
+        border-radius: 8px;
+        padding: 8px 12px;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        background: #fff;
+      }
+      .page-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
 
-    /* ---------- Floating run button (keeps same IDs) ---------- */
-    .fab-run {
-      position: fixed; right: 22px; bottom: 22px; z-index:9998; border-radius:999px; padding:12px 18px; box-shadow: 0 12px 36px rgba(11,37,69,0.12);
-    }
+      /* ---------- Floating run button (keeps same IDs) ---------- */
+      .fab-run {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        z-index: 9998;
+        border-radius: 999px;
+        padding: 12px 18px;
+        box-shadow: 0 12px 36px rgba(11, 37, 69, 0.12);
+      }
 
-    /* ---------- Footer ---------- */
-    footer.site-footer {
-      padding:28px 0; color:#fff; margin-top:22px;
-      background: linear-gradient(90deg,#0b2545 0%, #07122b 100%);
-    }
-    .footer-card { max-width:1100px; margin:0 auto; display:flex; gap:8px; align-items:center; justify-content:center; flex-direction:column; text-align:center; }
-    .footer-brand { display:flex; gap:12px; align-items:center; }
-    .footer-brand .logo { width:56px; height:56px; background:var(--accent-orange); color:#fff; display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:900; }
+      /* ---------- Footer ---------- */
+      footer.site-footer {
+        padding: 28px 0;
+        color: #fff;
+        margin-top: 22px;
+        background: linear-gradient(90deg, #0b2545 0%, #07122b 100%);
+      }
+      .footer-card {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+      }
+      .footer-brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .footer-brand .logo {
+        width: 56px;
+        height: 56px;
+        background: var(--accent-orange);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 900;
+      }
 
-    @media (max-width: 900px){
-      .hero { padding:30px 14px; text-align:center; }
-      .brand-mark { margin:0 auto 14px; }
-      .footer-card { text-align:center; flex-direction:column; gap:8px; }
-      .topbar { margin:8px; }
-      .hero-impact { padding:20px; }
-    }
+      @media (max-width: 900px) {
+        .hero {
+          padding: 30px 14px;
+          text-align: center;
+        }
+        .brand-mark {
+          margin: 0 auto 14px;
+        }
+        .footer-card {
+          text-align: center;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .topbar {
+          margin: 8px;
+        }
+        .hero-impact {
+          padding: 20px;
+        }
+      }
 
-    /* micro-interactions */
-    .section-card:hover { transform: translateY(-3px); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
-    .brand-mark { transition: transform .45s cubic-bezier(.2,.8,.2,1); }
-    .brand-mark:hover { transform: translateY(-6px) scale(1.02); }
-  </style>
-</head>
-<body id="page-top">
-  <!-- Topbar (no white gap above) -->
-  <nav id="topbar" class="topbar navbar navbar-expand-lg">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="#page-top">
-        <div class="topbar-image">
-          <picture>
-            <source srcset="../static/img/awslogo.png" type="image/webp">
-            <img id="brand-image" src="../static/img/awslogo.png" alt="Seu logo" style="height:44px;border-radius:8px;margin-right:12px;"
-                 onerror="this.onerror=null; this.style.display='none'; console.warn('Logo não encontrado: /static/img/awslogo.png');">
-          </picture>
+      /* micro-interactions */
+      .section-card:hover {
+        transform: translateY(-3px);
+        transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .brand-mark {
+        transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .brand-mark:hover {
+        transform: translateY(-6px) scale(1.02);
+      }
+    </style>
+  </head>
+  <body id="page-top" data-bs-spy="scroll" data-bs-target="#navMenu" data-bs-offset="80" tabindex="0">
+    <!-- Topbar (no white gap above) -->
+    <nav id="topbar" class="topbar navbar navbar-expand-lg">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="#page-top">
+          <div class="topbar-image">
+            <picture>
+              <source srcset="../static/img/awslogo.png" type="image/webp" />
+              <img
+                id="brand-image"
+                src="../static/img/awslogo.png"
+                alt="Seu logo"
+                style="height: 20px; border-radius: 3px; margin-right: 0px"
+                onerror="this.onerror=null; this.style.display='none'; console.warn('Logo não encontrado: /static/img/awslogo.png');"
+              />
+            </picture>
+          </div>
+          <div style="font-weight: 800; color: #fff; letter-spacing: 0.2px">
+            Amazon Re-Flow
+          </div>
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navMenu"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navMenu">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link page-scroll" href="#about">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link page-scroll" href="#overview">Overview</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link page-scroll" href="#insights">Insights</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link page-scroll" href="#reviews">Reviews</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link page-scroll" href="#export">Export</a>
+            </li>
+          </ul>
         </div>
-        <div style="font-weight:800;color:#fff;letter-spacing:0.2px">Amazon Re-Flow</div>
-      </a>
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse justify-content-end" id="navMenu">
-        <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link page-scroll" href="#about">About</a></li>
-          <li class="nav-item"><a class="nav-link page-scroll" href="#overview">Overview</a></li>
-          <li class="nav-item"><a class="nav-link page-scroll" href="#insights">Insights</a></li>
-          <li class="nav-item"><a class="nav-link page-scroll" href="#reviews">Reviews</a></li>
-          <li class="nav-item"><a class="nav-link page-scroll" href="#export">Export</a></li>
-        </ul>
       </div>
-    </div>
-  </nav>
+    </nav>
 
-  <!-- HERO / ABOUT -->
-  <header class="hero-about" id="about" role="banner">
-    <div class="hero-backdrop" aria-hidden="true"></div>
-    <div class="hero-glow" aria-hidden="true"></div>
+    <!-- HERO / ABOUT -->
+    <header class="hero-about" id="about" role="banner">
+      <div class="hero-backdrop" aria-hidden="true"></div>
+      <div class="hero-glow" aria-hidden="true"></div>
 
-    <div class="container hero-inner" >
-      <div class="row align-items-center">
-        <div class="col-lg-6" data-aos="fade-right">
-          <img id="hero-logo" src="../static/img/amazonrevlogo.png" alt="Logo" style="max-width:180px;display:block;margin-bottom:12px;"
-               onerror="this.onerror=null; this.style.display='none'; console.warn('Imagem do hero não encontrada: /static/img/amazonrevlogo.png');">
-          <h1 class="mt-3">Dashboard de análises de reviews</h1>
-          <p class="lead">Pipeline completo: extração, limpeza, análise de sentimento e visualizações interativas. Explore métricas e exporte CSV para dashboards.</p>
+      <div class="container hero-inner">
+        <div class="row align-items-center">
+          <div class="col-lg-6" data-aos="fade-right">
+            <img
+              id="hero-logo"
+              src="../static/img/amazonrevlogo.png"
+              alt="Logo"
+              style="max-width: 180px; display: block; margin-bottom: 12px"
+              onerror="this.onerror=null; this.style.display='none'; console.warn('Imagem do hero não encontrada: /static/img/amazonrevlogo.png');"
+            />
+            <h1 class="mt-3">Dashboard de análises de reviews</h1>
+            <p class="lead">
+              Pipeline completo: extração, limpeza, análise de sentimento e
+              visualizações interativas. Explore métricas e exporte CSV para
+              dashboards.
+            </p>
 
-          <div class="mt-4 d-flex gap-2 cta-row">
-            <button id="run-pipeline-hero" class="btn btn-accent btn-lg">Iniciar Análise</button>
-            <button id="cta-export-hero" class="btn btn-ghost btn-lg">Gerar CSV</button>
+            <div class="mt-4 d-flex gap-2 cta-row">
+              <button id="run-pipeline-hero" class="btn btn-accent btn-lg">
+                Iniciar Análise
+              </button>
+              <button id="cta-export-hero" class="btn btn-ghost btn-lg">
+                Gerar CSV
+              </button>
+            </div>
+
+            <div class="hero-meta">
+              Explore insights claros e visuais — para ajudar você a entender
+              oque importa.
+            </div>
           </div>
 
-          <div class="hero-meta">Explore insights claros e visuais — para ajudar você a entender o que importa.</div>
-        </div>
-
-        <!-- Substituí o card por um bloco centralizado e equilibrado -->
-        <div class="col-lg-6 d-flex align-items-center justify-content-center" data-aos="fade-left">
-          <div class="hero-impact" role="complementary" aria-hidden="false">
-            <h2>Transforme feedback em <span class="hero-highlight">insights</span> que geram ação</h2>
-            <p class="lead" style="color:rgba(255,255,255,0.92); margin-bottom:0;">Identifique o que importa, priorize melhorias e compartilhe resultados em um clique — simples, direto e visual.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="wave" aria-hidden="true" style="position:absolute;left:0;right:0;bottom:-1px;z-index:2;">
-      <svg viewBox="0 0 1200 72" preserveAspectRatio="none"><path d="M0,0 C300,72 600,72 1200,0 L1200,72 L0,72 Z" fill="#ffffff" opacity="0.98"></path></svg>
-    </div>
-  </header>
-
-  <!-- OVERVIEW -->
-  <section id="overview">
-    <div class="container" data-aos="fade-up">
-      <div class="section-title">Overview</div>
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <div class="text-muted">KPIs e filtros rápidos</div>
-        </div>
-        <div class="d-flex gap-2 align-items-center">
-          <select id="select-product" class="form-select form-select-sm" style="width:220px;">
-            <option value="__all__">Todos os produtos</option>
-          </select>
-          <select id="select-limit" class="form-select form-select-sm" style="width:120px;">
-            <option>100</option><option>500</option><option selected>1000</option><option>5000</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row g-3">
-        <div class="col-md-3">
-          <div class="section-card kpi-card text-center py-3">
-            <div class="small text-muted">Total reviews</div>
-            <div id="kpi-total" class="h3 fw-bold">—</div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="section-card kpi-card text-center py-3">
-            <div class="small text-muted">Avg rating</div>
-            <div id="kpi-avg" class="h3 fw-bold">—</div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="section-card kpi-card text-center py-3">
-            <div class="small text-muted">Positive</div>
-            <div id="kpi-pos" class="h3 fw-bold">—</div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="section-card kpi-card text-center py-3">
-            <div class="small text-muted">Negative</div>
-            <div id="kpi-neg" class="h3 fw-bold">—</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- INSIGHTS -->
-  <section id="insights" style="background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);">
-    <div class="container" data-aos="fade-up">
-      <div class="section-title">Insights</div>
-      <div class="small text-muted mb-3">Visualizações interativas</div>
-
-      <div class="row g-3">
-        <div class="col-lg-4">
-          <div class="section-card p-3">
-            <h6 class="mb-2">Sentiment</h6>
-            <div class="chart-wrap"><canvas id="chart-sentiment"></canvas></div>
-          </div>
-        </div>
-
-        <div class="col-lg-8">
-          <div class="section-card p-3">
-            <h6 class="mb-2">Rating distribution</h6>
-            <div class="chart-wrap"><canvas id="chart-rating"></canvas></div>
-          </div>
-        </div>
-
-        <div class="col-lg-6">
-          <div class="section-card p-3">
-            <h6 class="mb-2">Top products</h6>
-            <div class="chart-wrap"><canvas id="chart-top-products"></canvas></div>
-          </div>
-        </div>
-
-        <div class="col-lg-6">
-          <div class="section-card p-3">
-            <h6 class="mb-2">Top keywords</h6>
-            <div class="chart-wrap"><canvas id="chart-keywords"></canvas></div>
-          </div>
-        </div>
-
-        <div class="col-12">
-          <div class="section-card p-3">
-            <h6 class="mb-2">Reviews over time</h6>
-            <div class="chart-wrap"><canvas id="chart-timeseries"></canvas></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- REVIEWS TABLE -->
-  <section id="reviews">
-    <div class="container" data-aos="fade-up">
-      <div class="section-title">Reviews</div>
-
-      <div class="reviews-panel">
-        <div class="reviews-controls mb-2">
-          <div class="reviews-search">
-            <input id="search-box" class="form-control form-control-sm" placeholder="Pesquisar review_id, produto, texto..." />
-          </div>
-
-          <div class="ms-auto d-flex gap-2 align-items-center">
-            <label class="small text-muted mb-0 me-2">Linhas / página</label>
-            <select id="page-size" class="form-select form-select-sm" style="width:100px;">
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50" selected>50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="section-card p-2">
-          <div class="table-wrap mb-2">
-            <table class="table table-sm table-hover" id="reviews-table">
-              <thead><tr><th style="min-width:120px">ID</th><th>Produto</th><th>Rating</th><th>Sentiment</th><th>Keywords</th><th>Preview</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="small text-muted" id="table-info">—</div>
-            <div>
-              <button id="prev-page" class="page-btn me-2">Anterior</button>
-              <button id="next-page" class="page-btn">Próxima</button>
+          <!-- Substituí o card por um bloco centralizado e equilibrado -->
+          <div
+            class="col-lg-6 d-flex align-items-center justify-content-center"
+            data-aos="fade-left"
+          >
+            <div class="hero-impact" role="complementary" aria-hidden="false">
+              <h2>
+                Transforme feedback em
+                <span class="hero-highlight">insights</span> que geram ação
+              </h2>
+              <p
+                class="lead"
+                style="color: rgba(255, 255, 255, 0.92); margin-bottom: 0"
+              >
+                Identifique o que importa, priorize melhorias e compartilhe
+                resultados em um clique — simples, direto e visual.
+              </p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- EXPORT -->
-  <section id="export" style="background: linear-gradient(90deg,#fffaf0, #f0f9ff);">
-    <div class="container" data-aos="fade-up">
-      <div class="section-title">Export</div>
-      <div class="small text-muted mb-3">Gere CSV pronto para Google Sheets / Looker Studio</div>
-      <div class="section-card p-3 d-flex justify-content-between align-items-center">
-        <div>
-          <strong>Export CSV</strong><div class="small text-muted">Clique em Gerar e depois em Download</div>
+      <div
+        class="wave"
+        aria-hidden="true"
+        style="position: absolute; left: 0; right: 0; bottom: -1px; z-index: 2"
+      >
+        <svg viewBox="0 0 1200 72" preserveAspectRatio="none">
+          <path
+            d="M0,0 C300,72 600,72 1200,0 L1200,72 L0,72 Z"
+            fill="#ffffff"
+            opacity="0.98"
+          ></path>
+        </svg>
+      </div>
+    </header>
+
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <div class="container" data-aos="fade-up">
+        <div class="section-title">Overview</div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <div class="text-muted">KPIs e filtros rápidos</div>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <select
+              id="select-product"
+              class="form-select form-select-sm"
+              style="width: 220px"
+            >
+              <option value="__all__">Todos os produtos</option>
+            </select>
+            <select
+              id="select-limit"
+              class="form-select form-select-sm"
+              style="width: 120px"
+            >
+              <option>100</option>
+              <option>500</option>
+              <option selected>1000</option>
+              <option>5000</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <button id="btn-export" class="btn btn-primary">Gerar CSV</button>
-          <a id="link-csv" class="btn btn-success d-none" href="/download/export" download>Download CSV</a>
+
+        <div class="row g-3">
+          <div class="col-md-3">
+            <div class="section-card kpi-card text-center py-3">
+              <div class="small text-muted">Total reviews</div>
+              <div id="kpi-total" class="h3 fw-bold">—</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="section-card kpi-card text-center py-3">
+              <div class="small text-muted">Avg rating</div>
+              <div id="kpi-avg" class="h3 fw-bold">—</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="section-card kpi-card text-center py-3">
+              <div class="small text-muted">Positive</div>
+              <div id="kpi-pos" class="h3 fw-bold">—</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="section-card kpi-card text-center py-3">
+              <div class="small text-muted">Negative</div>
+              <div id="kpi-neg" class="h3 fw-bold">—</div>
+            </div>
+          </div>
         </div>
       </div>
+    </section>
+
+    <!-- INSIGHTS -->
+    <section
+      id="insights"
+      style="background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%)"
+    >
+      <div class="container" data-aos="fade-up">
+        <div class="section-title">Insights</div>
+        <div class="small text-muted mb-3">Visualizações interativas</div>
+
+        <div class="row g-3">
+          <div class="col-lg-4">
+            <div class="section-card p-3">
+              <h6 class="mb-2">Sentiment</h6>
+              <div class="chart-wrap">
+                <canvas id="chart-sentiment"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-8">
+            <div class="section-card p-3">
+              <h6 class="mb-2">Rating distribution</h6>
+              <div class="chart-wrap"><canvas id="chart-rating"></canvas></div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="section-card p-3">
+              <h6 class="mb-2">Top products</h6>
+              <div class="chart-wrap">
+                <canvas id="chart-top-products"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="section-card p-3">
+              <h6 class="mb-2">Top keywords</h6>
+              <div class="chart-wrap">
+                <canvas id="chart-keywords"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="section-card p-3">
+              <h6 class="mb-2">Reviews over time</h6>
+              <div class="chart-wrap">
+                <canvas id="chart-timeseries"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Chart Builder -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="section-card p-3">
+              <h6 class="mb-2">Custom Chart Builder</h6>
+              <div class="row g-2 align-items-center">
+                <div class="col-md-3">
+                  <label class="small">Metric</label>
+                  <select id="custom-metric" class="form-select form-select-sm">
+                    <option value="by_product">Count by Product</option>
+                    <option value="by_sentiment">Count by Sentiment</option>
+                    <option value="by_rating">Count by Rating</option>
+                    <option value="by_keyword">Top Keywords</option>
+                    <option value="timeseries">Timeseries (by month)</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="small">Chart type</label>
+                  <select
+                    id="custom-chart-type"
+                    class="form-select form-select-sm"
+                  >
+                    <option value="bar">Bar</option>
+                    <option value="horizontalBar">Horizontal Bar</option>
+                    <option value="pie">Pie</option>
+                    <option value="line">Line</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="small">Top N</label>
+                  <input
+                    id="custom-top-n"
+                    class="form-control form-control-sm"
+                    type="number"
+                    value="8"
+                    min="1"
+                    max="200"
+                  />
+                </div>
+                <div class="col-md-2">
+                  <label class="small">&nbsp;</label>
+                  <button
+                    id="btn-generate-custom"
+                    class="btn btn-accent btn-sm w-100"
+                  >
+                    Generate
+                  </button>
+                </div>
+                <div class="col-md-12 mt-3">
+                  <div class="chart-wrap">
+                    <canvas id="chart-custom"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- end custom builder -->
+      </div>
+    </section>
+
+    <!-- REVIEWS TABLE -->
+    <section id="reviews">
+      <div class="container" data-aos="fade-up">
+        <div class="section-title">Reviews</div>
+
+        <div class="reviews-panel">
+          <div class="reviews-controls mb-2">
+            <div class="reviews-search">
+              <input
+                id="search-box"
+                class="form-control form-control-sm"
+                placeholder="Pesquisar review_id, produto, texto..."
+              />
+            </div>
+
+            <div class="ms-auto d-flex gap-2 align-items-center">
+              <label class="small text-muted mb-0 me-2">Linhas / página</label>
+              <select
+                id="page-size"
+                class="form-select form-select-sm"
+                style="width: 100px"
+              >
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="10" selected>10</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section-card p-2">
+            <div class="table-wrap mb-2">
+              <table class="table table-sm table-hover" id="reviews-table">
+                <thead>
+                  <tr>
+                    <th style="min-width: 120px">ID</th>
+                    <th>Produto</th>
+                    <th>Rating</th>
+                    <th>Sentiment</th>
+                    <th>Keywords</th>
+                    <th>Preview</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="small text-muted" id="table-info">—</div>
+              <div>
+                <button id="prev-page" class="page-btn me-2">Anterior</button>
+                <button id="next-page" class="page-btn">Próxima</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPORT -->
+    <section
+      id="export"
+      style="background: linear-gradient(90deg, #fffaf0, #f0f9ff)"
+    >
+      <div class="container" data-aos="fade-up">
+        <div class="section-title">Export</div>
+        <div class="small text-muted mb-3">
+          Gere CSV pronto para Google Sheets / Looker Studio
+        </div>
+        <div
+          class="section-card p-3 d-flex justify-content-between align-items-center"
+        >
+          <div>
+            <strong>Export CSV</strong>
+            <div class="small text-muted">
+              Clique em Gerar e depois em Download
+            </div>
+          </div>
+          <div>
+            <button id="btn-export" class="btn btn-primary">Gerar CSV</button>
+            <a
+              id="link-csv"
+              class="btn btn-success d-none"
+              href="/download/export"
+              download
+              >Download CSV</a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- footer -->
+    <footer class="site-footer">
+      <div class="footer-card container">
+        <div class="small text-white-50">
+          &copy; 2025 — Todos os direitos reservados
+        </div>
+      </div>
+    </footer>
+
+    <!-- Floating action (keeps same IDs — safe to use) -->
+    <div class="fab-run">
+      <button
+        id="run-pipeline-hero-fab"
+        onclick="document.getElementById('run-pipeline-hero').click()"
+        class="btn btn-accent"
+      >
+        Iniciar Análise
+      </button>
     </div>
-  </section>
 
-  <!-- footer -->
-  <footer class="site-footer">
-    <div class="footer-card container">
-      <div class="small text-white-50">&copy; 2025 — Todos os direitos reservados</div>
-    </div>
-  </footer>
+    <!-- AOS -->
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script>
+      AOS.init({ duration: 700, once: true, easing: "ease-out-cubic" });
+      // small class toggle if scrolled
+      window.addEventListener("scroll", () => {
+        document
+          .getElementById("topbar")
+          .classList.toggle("scrolled", window.scrollY > 12);
+      });
+    </script>
 
-  <!-- Floating action (keeps same IDs — safe to use) -->
-  <div class="fab-run">
-    <button id="run-pipeline-hero-fab" onclick="document.getElementById('run-pipeline-hero').click()" class="btn btn-accent">Iniciar Análise</button>
-  </div>
+    <!-- App JS (mantive a lógica exatamente igual — apenas estilizei a página) -->
+    <script>
+      // cache do mapping product_id -> short name
+      let PRODUCTS_MAP_CACHE = null; // raw backend map
+      let productMap = {};
 
-  <!-- AOS -->
-  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-  <script>
-    AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic' });
-    // small class toggle if scrolled
-    window.addEventListener('scroll', ()=>{ document.getElementById('topbar').classList.toggle('scrolled', window.scrollY>12); });
-  </script>
-
-  <!-- App JS (mantive a lógica exatamente igual — apenas estilizei a página) -->
-<script>
-  const API = {
-    stats: '/api/stats',
-    reviews: (limit=100, offset=0)=>`/api/reviews?limit=${limit}&offset=${offset}`,
-    export: '/api/export',
-    run: '/api/run',
-    download: '/download/export'
-  };
-
-  async function fetchJson(url){
-    const r = await fetch(url);
-    if(!r.ok) throw new Error('HTTP ' + r.status);
-    return await r.json();
-  }
-
-  // Normaliza a resposta: aceita array OR { total, rows }
-  function normalizeListResponse(j){
-    if(!j) return { total: 0, rows: [] };
-    if(Array.isArray(j)) return { total: j.length, rows: j };
-    if(j.rows && Array.isArray(j.rows)) return { total: j.total ?? j.rows.length, rows: j.rows };
-    // se veio um object com dados compactados
-    return { total: j.total ?? 0, rows: j.rows ?? [] };
-  }
-
-  async function fetchReviewsPage(pageIdx=0, pageSize=50){
-    const offset = pageIdx * pageSize;
-    const url = `/api/reviews?limit=${pageSize}&offset=${offset}`;
-    const res = await fetch(url);
-    if(!res.ok) return { total:0, rows: [] };
-    const j = await res.json();
-    return normalizeListResponse(j);
-  }
-
-  async function fetchReviewsAll(limit=1000){
-    const res = await fetch(`/api/reviews?limit=${limit}&offset=0`);
-    if(!res.ok) return { total:0, rows: [] };
-    const j = await res.json();
-    return normalizeListResponse(j);
-  }
-
-  let charts = {}, page = 0, lastFetched = { total:0, rows:[] };
-
-  function topNMap(arr, n=10){
-    const counts = {};
-    for(const x of arr){ if(!x && x!==0) continue; counts[x] = (counts[x]||0)+1; }
-    return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,n);
-  }
-
-  async function renderKPIs(){
-    try{
-      const s = await fetchJson(API.stats);
-      document.getElementById('kpi-total').innerText = s.total ?? '—';
-      document.getElementById('kpi-avg').innerText = s.avg_rating ? Number(s.avg_rating).toFixed(2) : '—';
-      document.getElementById('kpi-pos').innerText = s.pct_pos ? Number(s.pct_pos).toFixed(1)+'%' : '—';
-      document.getElementById('kpi-neg').innerText = s.pct_neg ? Number(s.pct_neg).toFixed(1)+'%' : '—';
-    }catch(e){ console.warn('KPIs:', e); }
-  }
-
-  async function renderCharts(){
-    try{
-      const limit = Number(document.getElementById('select-limit').value || 1000);
-      const all = await fetchReviewsAll(limit);
-      const reviews = all.rows;
-      lastFetched = all;
-      // garante array
-      const sentiments = reviews.map(r=>r.sentiment||'unknown');
-      const ratings = reviews.map(r=>Math.round(Number(r.rating)||0));
-      const keywords = reviews.flatMap(r => (r.keywords||'').split(',').map(s=>s.trim()).filter(Boolean));
-      const times = reviews.map(r => r.review_date ? new Date(r.review_date) : null).filter(Boolean);
-
-      // Sentiment -> doughnut
-      const sentMap = Object.fromEntries(topNMap(sentiments, 6).map(i=>[i[0], i[1]]));
-      const sentLabels = Object.keys(sentMap);
-      const sentData = sentLabels.map(l=>sentMap[l]);
-      const ctxSent = document.getElementById('chart-sentiment').getContext('2d');
-      if(charts.sent) charts.sent.destroy();
-      charts.sent = new Chart(ctxSent, { type:'doughnut', data:{ labels:sentLabels, datasets:[{ data:sentData }]}, options:{ plugins:{ legend:{ position:'bottom' } } } });
-
-      // Rating distribution -> bar
-      const counts = {};
-      for(const r of ratings) counts[r] = (counts[r]||0)+1;
-      const allRatings = [1,2,3,4,5];
-      const ratingVals = allRatings.map(l=>counts[l]||0);
-      const ctxRating = document.getElementById('chart-rating').getContext('2d');
-      if(charts.rating) charts.rating.destroy();
-      charts.rating = new Chart(ctxRating, { type:'bar', data:{ labels: allRatings.map(String), datasets:[{ label:'Qtd', data: ratingVals }]}, options:{ scales:{ y:{ beginAtZero:true }}, plugins:{ legend:{ display:false } } } });
-
-      // Top products -> horizontal bar
-      const prodMap = topNMap(reviews.map(r=>r.product_id), 8);
-      const prodLabels = prodMap.map(i=>i[0]); const prodValues = prodMap.map(i=>i[1]);
-      const ctxProd = document.getElementById('chart-top-products').getContext('2d');
-      if(charts.prod) charts.prod.destroy();
-      charts.prod = new Chart(ctxProd, { type:'bar', data:{ labels: prodLabels, datasets:[{ data:prodValues }]}, options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true } } } });
-
-      // Keywords -> horizontal bar
-      const kwMap = topNMap(keywords, 10); const kwLabels = kwMap.map(i=>i[0]); const kwValues = kwMap.map(i=>i[1]);
-      const ctxKw = document.getElementById('chart-keywords').getContext('2d');
-      if(charts.kw) charts.kw.destroy();
-      charts.kw = new Chart(ctxKw, { type:'bar', data:{ labels: kwLabels, datasets:[{ data:kwValues }]}, options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true } } } });
-
-      // Timeseries
-      const byMonth = {};
-      for(const d of times){ const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; byMonth[key] = (byMonth[key]||0)+1; }
-      const months = Object.keys(byMonth).sort(); const countsMonth = months.map(m=>byMonth[m]);
-      const ctxTime = document.getElementById('chart-timeseries').getContext('2d');
-      if(charts.time) charts.time.destroy();
-      charts.time = new Chart(ctxTime, { type:'line', data:{ labels: months, datasets:[{ label:'Reviews', data: countsMonth, tension:0.25, fill:true }]}, options:{ scales:{ y:{ beginAtZero:true } }, plugins:{ legend:{ display:false } } } });
-
-      // populate products select
-      const prodSel = document.getElementById('select-product');
-      const prods = [...new Set(reviews.map(r=>r.product_id))].slice(0,200);
-      const prev = prodSel.value;
-      prodSel.innerHTML = '<option value="__all__">Todos os produtos</option>' + prods.map(p=>`<option value="${p}">${p}</option>`).join('');
-      if(prods.includes(prev) || prev==='__all__') prodSel.value = prev;
-    }catch(e){ console.error('renderCharts error', e); }
-  }
-
-  async function renderTable(){
-    const pageSize = Number(document.getElementById('page-size').value || 50);
-    const resp = await fetchReviewsPage(page, pageSize);
-    const rows = resp.rows || [];
-    const tbody = document.querySelector('#reviews-table tbody');
-    const q = document.getElementById('search-box').value.trim().toLowerCase();
-    const filtered = rows.filter(r => {
-      if(!q) return true;
-      return (r.review_id||'').toLowerCase().includes(q) ||
-             (r.product_id||'').toLowerCase().includes(q) ||
-             (r.review_text||'').toLowerCase().includes(q);
-    });
-    tbody.innerHTML = filtered.map(r => `
-      <tr>
-        <td style="max-width:200px;word-break:break-word">${r.review_id}</td>
-        <td>${r.product_id}</td>
-        <td>${r.rating}</td>
-        <td>${r.sentiment}</td>
-        <td>${(r.keywords||'').slice(0,80)}</td>
-        <td>${(r.review_text||'').substring(0,160)}</td>
-      </tr>
-    `).join('');
-    document.getElementById('table-info').innerText = `Página ${page+1} • Mostrando ${filtered.length} reviews (tamanho ${pageSize})`;
-    document.getElementById('prev-page').disabled = (page <= 0);
-    document.getElementById('next-page').disabled = (rows.length < pageSize);
-  }
-
-  // UI bindings
-  document.getElementById('btn-export')?.addEventListener('click', genExportUI);
-  document.getElementById('run-pipeline-hero')?.addEventListener('click', runPipelineUI);
-  document.getElementById('cta-export-hero')?.addEventListener('click', genExportUI);
-
-  document.getElementById('select-limit')?.addEventListener('change', ()=>{ renderCharts(); renderKPIs(); });
-  document.getElementById('select-product')?.addEventListener('change', ()=>{ renderCharts(); renderTable(); });
-  document.getElementById('page-size')?.addEventListener('change', ()=>{ page=0; renderTable(); });
-
-  document.getElementById('prev-page').addEventListener('click', ()=>{ if(page>0){ page--; renderTable(); }});
-  document.getElementById('next-page').addEventListener('click', ()=>{ page++; renderTable(); });
-
-  document.getElementById('search-box')?.addEventListener('input', ()=>{ page=0; renderTable(); });
-
-  async function runPipelineUI(){
-    const b = document.getElementById('run-pipeline-hero');
-    if(b) { b.disabled = true; b.innerText = 'Iniciando...'; }
-    try{
-      await fetch(API.run, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ to_db:true }) });
-      console.log('Análise iniciada.');
-      setTimeout(()=>{ renderKPIs(); renderCharts(); renderTable(); if(b){ b.disabled=false; b.innerText='Iniciar Análise'; } }, 4000);
-    }catch(e){ console.error('Erro ao iniciar análise:', e); if(b){ b.disabled=false; b.innerText='Iniciar Análise'; } }
-  }
-
-  async function genExportUI(){
-    const b = document.getElementById('btn-export') || document.getElementById('cta-export-hero');
-    if(b){ b.disabled = true; b.innerText = 'Gerando...'; }
-    try{
-      const r = await fetch(API.export);
-      const j = await r.json();
-      if(j && j.path){
-        document.getElementById('link-csv').classList.remove('d-none');
-        console.log('Export gerado: '+j.path);
-      } else {
-        console.error('Falha ao gerar export');
+      async function fetchProductsMap() {
+        // single canonical loader
+        if (PRODUCTS_MAP_CACHE) {
+          productMap = PRODUCTS_MAP_CACHE;
+          return PRODUCTS_MAP_CACHE;
+        }
+        try {
+          const res = await fetch("/api/products");
+          if (!res.ok) {
+            PRODUCTS_MAP_CACHE = {};
+            productMap = {};
+            return PRODUCTS_MAP_CACHE;
+          }
+          const j = await res.json();
+          PRODUCTS_MAP_CACHE = j || {};
+          productMap = PRODUCTS_MAP_CACHE;
+          return PRODUCTS_MAP_CACHE;
+        } catch (e) {
+          console.warn("fetchProductsMap failed", e);
+          PRODUCTS_MAP_CACHE = {};
+          productMap = {};
+          return PRODUCTS_MAP_CACHE;
+        }
       }
-    }catch(e){ console.error('Erro ao gerar export:', e); }
-    if(b){ b.disabled = false; b.innerText = 'Gerar CSV'; }
-  }
 
-  (async function init(){
-    await renderKPIs();
-    await renderCharts();
-    await renderTable();
-    setInterval(renderKPIs, 12000);
-  })();
+      function simplifyProductName(name) {
+        if (!name) return "";
+        let s = String(name);
 
-  /* ---------- Nav highlight on scroll ---------- */
-  (function(){
-    const sectionIds = ['about','overview','insights','reviews','export'];
-    const navLinks = Array.from(document.querySelectorAll('.navbar .nav-link'));
-    const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+        // remove parentheses content
+        s = s.replace(/\(.*?\)/g, "");
 
-    // when clicking a nav link, close collapsed menu (mobile) and ensure smooth behavior
-    navLinks.forEach(link=>{
-      link.addEventListener('click', (e)=>{
-        // collapse mobile menu if open
-        const bsCollapse = document.querySelector('#navMenu.collapse.show');
-        if(bsCollapse) {
-          const collapse = bootstrap.Collapse.getInstance(bsCollapse) || new bootstrap.Collapse(bsCollapse);
-          collapse.hide();
+        // collapse whitespace
+        s = s.replace(/\s+/g, " ").trim();
+
+        // take first segment before comma or hyphen
+        let seg = s.split(/[,–\-]/)[0].trim();
+
+        // split into tokens and remove tokens containing digits (eg: '6"', '16GB', '2016')
+        let tokens = seg.split(/[\s\/]+/).filter((t) => t && !/\d/.test(t));
+
+        // fallback: if all tokens removed (rare), use first words of original segment
+        if (tokens.length === 0) tokens = seg.split(/\s+/).filter(Boolean);
+
+        // Take up to first 3 tokens but try to keep meaningful pair like "Kindle E-reader"
+        const out = tokens.slice(0, 3).join(" ");
+
+        // Clean quotes
+        return out.replace(/["']/g, "").trim() || seg;
+      }
+
+      const API = {
+        stats: "/api/stats",
+        reviews: (limit = 100, offset = 0) =>
+          `/api/reviews?limit=${limit}&offset=${offset}`,
+        products: "/api/products",
+        export: "/api/export",
+        run: "/api/run",
+        download: "/download/export",
+      };
+
+      async function fetchJson(url) {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return await r.json();
+      }
+
+      // Normaliza a resposta: aceita array OR { total, rows }
+      function normalizeListResponse(j) {
+        if (!j) return { total: 0, rows: [] };
+        if (Array.isArray(j)) return { total: j.length, rows: j };
+        if (j.rows && Array.isArray(j.rows))
+          return { total: j.total ?? j.rows.length, rows: j.rows };
+        return { total: j.total ?? 0, rows: j.rows ?? [] };
+      }
+
+      async function fetchReviewsPage(pageIdx = 0, pageSize = 50) {
+        const offset = pageIdx * pageSize;
+        const url = `/api/reviews?limit=${pageSize}&offset=${offset}`;
+        const res = await fetch(url);
+        if (!res.ok) return { total: 0, rows: [] };
+        const j = await res.json();
+        return normalizeListResponse(j);
+      }
+
+      async function fetchReviewsAll(limit = 1000) {
+        const res = await fetch(`/api/reviews?limit=${limit}&offset=0`);
+        if (!res.ok) return { total: 0, rows: [] };
+        const j = await res.json();
+        return normalizeListResponse(j);
+      }
+
+      let charts = {},
+        page = 0,
+        lastFetched = { total: 0, rows: [] };
+
+      function topNMap(arr, n = 10) {
+        const counts = {};
+        for (const x of arr) {
+          if (!x && x !== 0) continue;
+          counts[x] = (counts[x] || 0) + 1;
+        }
+        return Object.entries(counts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, n);
+      }
+
+      async function renderKPIs() {
+        try {
+          const s = await fetchJson(API.stats);
+          document.getElementById("kpi-total").innerText = s.total ?? "—";
+          document.getElementById("kpi-avg").innerText = s.avg_rating
+            ? Number(s.avg_rating).toFixed(2)
+            : "—";
+          document.getElementById("kpi-pos").innerText = s.pct_pos
+            ? Number(s.pct_pos).toFixed(1) + "%"
+            : "—";
+          document.getElementById("kpi-neg").innerText = s.pct_neg
+            ? Number(s.pct_neg).toFixed(1) + "%"
+            : "—";
+        } catch (e) {
+          console.warn("KPIs:", e);
+        }
+      }
+
+      function friendlyProductName(pid) {
+        if (!pid) return "";
+        // prefer the loaded productMap from backend
+        if (productMap && productMap[pid]) return productMap[pid];
+        // fallback to PRODUCTS_MAP_CACHE (in case productMap not yet assigned)
+        if (PRODUCTS_MAP_CACHE && PRODUCTS_MAP_CACHE[pid])
+          return PRODUCTS_MAP_CACHE[pid];
+        // else: try to guess from pid-like string (last resort) or just show pid
+        // If pid looks like a long name (some CSVs may store name instead of id), try to simplify it:
+        if (pid.length > 20 && /[A-Za-z]/.test(pid)) {
+          return simplifyProductName(pid);
+        }
+        return pid;
+      }
+
+      async function renderCharts() {
+        try {
+          const limit = Number(
+            document.getElementById("select-limit").value || 1000
+          );
+          // ensure productMap loaded
+          if (!productMap || Object.keys(productMap).length === 0) {
+            productMap = await fetchProductsMap();
+          }
+
+          const all = await fetchReviewsAll(limit);
+          const reviews = all.rows;
+          lastFetched = all;
+          // garante array
+          const sentiments = reviews.map((r) => r.sentiment || "unknown");
+          const ratings = reviews.map((r) => Math.round(Number(r.rating) || 0));
+          const keywords = reviews.flatMap((r) =>
+            (r.keywords || "")
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          );
+          const times = reviews
+            .map((r) => (r.review_date ? new Date(r.review_date) : null))
+            .filter(Boolean);
+
+          // Sentiment -> doughnut
+          const sentMap = Object.fromEntries(
+            topNMap(sentiments, 6).map((i) => [i[0], i[1]])
+          );
+          const sentLabels = Object.keys(sentMap);
+          const sentData = sentLabels.map((l) => sentMap[l]);
+          // Sentiment -> doughnut with explicit color mapping
+          const ctxSent = document
+            .getElementById("chart-sentiment")
+            .getContext("2d");
+          if (charts.sent) charts.sent.destroy();
+
+          // map labels to colors so order doesn't break mapping
+          const sentimentColorMap = {
+            positive: "#16a34a", // green
+            neutral: "#f59e0b", // amber/yellow
+            negative: "#e11d48", // red
+            unknown: "#94a3b8", // grayish fallback
+          };
+          const sentColors = sentLabels.map(
+            (l) => sentimentColorMap[l] || sentimentColorMap["unknown"]
+          );
+
+          charts.sent = new Chart(ctxSent, {
+            type: "doughnut",
+            data: {
+              labels: sentLabels,
+              datasets: [
+                {
+                  data: sentData,
+                  backgroundColor: sentColors,
+                  borderColor: "#ffffff",
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: { plugins: { legend: { position: "bottom" } } },
+          });
+
+          // Rating distribution -> bar
+          const counts = {};
+          for (const r of ratings) counts[r] = (counts[r] || 0) + 1;
+          const allRatings = [1, 2, 3, 4, 5];
+          const ratingVals = allRatings.map((l) => counts[l] || 0);
+          const ctxRating = document
+            .getElementById("chart-rating")
+            .getContext("2d");
+          if (charts.rating) charts.rating.destroy();
+          charts.rating = new Chart(ctxRating, {
+            type: "bar",
+            data: {
+              labels: allRatings.map(String),
+              datasets: [
+                { label: "Qtd", data: ratingVals, backgroundColor: "#0b2545" },
+              ],
+            },
+            options: {
+              scales: { y: { beginAtZero: true } },
+              plugins: { legend: { display: false } },
+            },
+          });
+
+          // Top products -> horizontal bar (use friendly names)
+          const productsMap = await fetchProductsMap();
+          const prodCounts = topNMap(
+            reviews.map((r) => r.product_id),
+            8
+          );
+          const prodLabels = prodCounts.map((i) => {
+            const pid = i[0];
+            return productsMap && productsMap[pid] ? productsMap[pid] : pid;
+          });
+          const prodValues = prodCounts.map((i) => i[1]);
+          const ctxProd = document
+            .getElementById("chart-top-products")
+            .getContext("2d");
+          if (charts.prod) charts.prod.destroy();
+          charts.prod = new Chart(ctxProd, {
+            type: "bar",
+            data: { labels: prodLabels, datasets: [{ data: prodValues }] },
+            options: {
+              indexAxis: "y",
+              plugins: { legend: { display: false } },
+              scales: { x: { beginAtZero: true } },
+            },
+          });
+
+          // Keywords -> horizontal bar
+          const kwMap = topNMap(keywords, 10);
+          const kwLabels = kwMap.map((i) => i[0]);
+          const kwValues = kwMap.map((i) => i[1]);
+          const ctxKw = document
+            .getElementById("chart-keywords")
+            .getContext("2d");
+          if (charts.kw) charts.kw.destroy();
+          charts.kw = new Chart(ctxKw, {
+            type: "bar",
+            data: {
+              labels: kwLabels,
+              datasets: [{ data: kwValues, backgroundColor: "#0b2545" }],
+            },
+            options: {
+              indexAxis: "y",
+              plugins: { legend: { display: false } },
+              scales: { x: { beginAtZero: true } },
+            },
+          });
+
+          // Timeseries
+          const byMonth = {};
+          for (const d of times) {
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+              2,
+              "0"
+            )}`;
+            byMonth[key] = (byMonth[key] || 0) + 1;
+          }
+          const months = Object.keys(byMonth).sort();
+          const countsMonth = months.map((m) => byMonth[m]);
+          const ctxTime = document
+            .getElementById("chart-timeseries")
+            .getContext("2d");
+          if (charts.time) charts.time.destroy();
+          charts.time = new Chart(ctxTime, {
+            type: "line",
+            data: {
+              labels: months,
+              datasets: [
+                {
+                  label: "Reviews",
+                  data: countsMonth,
+                  tension: 0.25,
+                  fill: true,
+                  backgroundColor: "rgba(255,153,0,0.2)",
+                  borderColor: "#ff9900",
+                },
+              ],
+            },
+            options: {
+              scales: { y: { beginAtZero: true } },
+              plugins: { legend: { display: false } },
+            },
+          });
+
+          // populate products select (show friendly names)
+          const prodSel = document.getElementById("select-product");
+          const prods = [...new Set(reviews.map((r) => r.product_id))].slice(
+            0,
+            200
+          );
+          const prev = prodSel.value;
+          prodSel.innerHTML =
+            '<option value="__all__">Todos os produtos</option>' +
+            prods
+              .map(
+                (p) => `<option value="${p}">${friendlyProductName(p)}</option>`
+              )
+              .join("");
+          if (prods.includes(prev) || prev === "__all__") prodSel.value = prev;
+        } catch (e) {
+          console.error("renderCharts error", e);
+        }
+      }
+
+      async function renderTable() {
+        const pageSize = Number(
+          document.getElementById("page-size").value || 50
+        );
+        const resp = await fetchReviewsPage(page, pageSize);
+        const rows = resp.rows || [];
+        const tbody = document.querySelector("#reviews-table tbody");
+        const q = document
+          .getElementById("search-box")
+          .value.trim()
+          .toLowerCase();
+
+        // garante que temos o mapping carregado
+        await fetchProductsMap();
+
+        const filtered = rows.filter((r) => {
+          if (!q) return true;
+          return (
+            (r.review_id || "").toLowerCase().includes(q) ||
+            (friendlyProductName(r.product_id) || "")
+              .toLowerCase()
+              .includes(q) ||
+            (r.review_text || "").toLowerCase().includes(q)
+          );
+        });
+
+        tbody.innerHTML = filtered
+          .map(
+            (r) => `
+        <tr>
+          <td style="max-width:200px;word-break:break-word">${r.review_id}</td>
+          <td>${friendlyProductName(r.product_id)}</td>
+          <td>${r.rating}</td>
+          <td>${r.sentiment}</td>
+          <td>${(r.keywords || "").slice(0, 80)}</td>
+          <td>${(r.review_text || "").substring(0, 160)}</td>
+        </tr>
+      `
+          )
+          .join("");
+      }
+      // generate custom chart from lastFetched
+      function generateCustomChart() {
+        try {
+          const metric = document.getElementById("custom-metric").value;
+          const chartType = document.getElementById("custom-chart-type").value;
+          const topN =
+            Number(document.getElementById("custom-top-n").value) || 10;
+          const rows = lastFetched.rows || [];
+          let labels = [],
+            data = [];
+
+          if (metric === "by_product") {
+            const map = topNMap(
+              rows.map((r) => friendlyProductName(r.product_id)),
+              topN
+            );
+            labels = map.map((i) => i[0]);
+            data = map.map((i) => i[1]);
+          } else if (metric === "by_sentiment") {
+            const map = topNMap(
+              rows.map((r) => r.sentiment || "unknown"),
+              topN
+            );
+            labels = map.map((i) => i[0]);
+            data = map.map((i) => i[1]);
+          } else if (metric === "by_rating") {
+            const map = topNMap(
+              rows.map((r) => String(Math.round(Number(r.rating) || 0))),
+              topN
+            );
+            labels = map.map((i) => i[0]);
+            data = map.map((i) => i[1]);
+          } else if (metric === "by_keyword") {
+            const kw = rows.flatMap((r) =>
+              (r.keywords || "")
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean)
+            );
+            const map = topNMap(kw, topN);
+            labels = map.map((i) => i[0]);
+            data = map.map((i) => i[1]);
+          } else if (metric === "timeseries") {
+            // count by month
+            const byMon = {};
+            for (const r of rows) {
+              if (!r.review_date) continue;
+              const d = new Date(r.review_date);
+              if (isNaN(d)) continue;
+              const key = `${d.getFullYear()}-${String(
+                d.getMonth() + 1
+              ).padStart(2, "0")}`;
+              byMon[key] = (byMon[key] || 0) + 1;
+            }
+            labels = Object.keys(byMon).sort();
+            data = labels.map((l) => byMon[l]);
+          }
+
+          const ctx = document.getElementById("chart-custom").getContext("2d");
+          if (charts.custom) charts.custom.destroy();
+
+          // map "horizontalBar" to bar with indexAxis value
+          const config = {
+            type: chartType === "horizontalBar" ? "bar" : chartType,
+            data: {
+              labels,
+              datasets: [
+                {
+                  data,
+                  backgroundColor: labels.map((_, i) =>
+                    i % 2 ? "#ff9900" : "#0b2545"
+                  ),
+                },
+              ],
+            },
+            options: {},
+          };
+          if (chartType === "horizontalBar")
+            config.options = {
+              indexAxis: "y",
+              scales: { x: { beginAtZero: true } },
+            };
+          if (chartType === "line")
+            config.options = {
+              scales: { y: { beginAtZero: true } },
+              elements: { line: { tension: 0.25 } },
+            };
+
+          charts.custom = new Chart(ctx, config);
+        } catch (e) {
+          console.error("generateCustomChart error", e);
+        }
+      }
+
+      // UI bindings
+      document
+        .getElementById("btn-export")
+        ?.addEventListener("click", genExportUI);
+      document
+        .getElementById("run-pipeline-hero")
+        ?.addEventListener("click", runPipelineUI);
+      document
+        .getElementById("cta-export-hero")
+        ?.addEventListener("click", genExportUI);
+      document
+        .getElementById("btn-generate-custom")
+        ?.addEventListener("click", generateCustomChart);
+
+      document
+        .getElementById("select-limit")
+        ?.addEventListener("change", () => {
+          renderCharts();
+          renderKPIs();
+        });
+      document
+        .getElementById("select-product")
+        ?.addEventListener("change", () => {
+          renderCharts();
+          renderTable();
+        });
+      document.getElementById("page-size")?.addEventListener("change", () => {
+        page = 0;
+        renderTable();
+      });
+
+      document.getElementById("prev-page").addEventListener("click", () => {
+        if (page > 0) {
+          page--;
+          renderTable();
         }
       });
-    });
+      document.getElementById("next-page").addEventListener("click", () => {
+        page++;
+        renderTable();
+      });
 
-    const obs = new IntersectionObserver(entries=>{
-      entries.forEach(entry=>{
-        const id = entry.target.id;
-        const link = document.querySelector('.navbar .nav-link[href="#'+id+'"]');
-        if(link){
-          if(entry.isIntersecting && entry.intersectionRatio > 0.45){
-            navLinks.forEach(n=>n.classList.remove('active'));
-            link.classList.add('active');
+      document.getElementById("search-box")?.addEventListener("input", () => {
+        page = 0;
+        renderTable();
+      });
+
+      async function runPipelineUI() {
+        const b = document.getElementById("run-pipeline-hero");
+        if (b) {
+          b.disabled = true;
+          b.innerText = "Iniciando...";
+        }
+        try {
+          await fetch(API.run, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ to_db: true }),
+          });
+          console.log("Análise iniciada.");
+          // small polling updates
+          setTimeout(() => {
+            renderKPIs();
+            renderCharts();
+            renderTable();
+            if (b) {
+              b.disabled = false;
+              b.innerText = "Iniciar Análise";
+            }
+          }, 3500);
+          setTimeout(() => {
+            renderKPIs();
+            renderCharts();
+            renderTable();
+          }, 8000);
+        } catch (e) {
+          console.error("Erro ao iniciar análise:", e);
+          if (b) {
+            b.disabled = false;
+            b.innerText = "Iniciar Análise";
           }
         }
-      });
-    }, { threshold: [0.45] });
+      }
 
-    sections.forEach(s=>obs.observe(s));
-  })();
-</script>
+      async function genExportUI() {
+        const b =
+          document.getElementById("btn-export") ||
+          document.getElementById("cta-export-hero");
+        if (b) {
+          b.disabled = true;
+          b.innerText = "Gerando...";
+        }
+        try {
+          const r = await fetch(API.export);
+          const j = await r.json();
+          if (j && j.path) {
+            document.getElementById("link-csv").classList.remove("d-none");
+            console.log("Export gerado: " + j.path);
+          } else {
+            console.error("Falha ao gerar export");
+          }
+        } catch (e) {
+          console.error("Erro ao gerar export:", e);
+        }
+        if (b) {
+          b.disabled = false;
+          b.innerText = "Gerar CSV";
+        }
+      }
 
-  <!-- Bootstrap bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+      (async function init() {
+        // load product map early
+        productMap = await fetchProductsMap();
+        await renderKPIs();
+        await renderCharts();
+        await renderTable();
+        setInterval(renderKPIs, 12000);
+      })();
+
+      /* ---------- Nav highlight on scroll ---------- */
+      (function () {
+        const sectionIds = [
+          "about",
+          "overview",
+          "insights",
+          "reviews",
+          "export",
+        ];
+        const navLinks = Array.from(
+          document.querySelectorAll(".navbar .nav-link")
+        );
+        const sections = sectionIds
+          .map((id) => document.getElementById(id))
+          .filter(Boolean);
+
+        // when clicking a nav link, close collapsed menu (mobile) and ensure smooth behavior
+        navLinks.forEach((link) => {
+          link.addEventListener("click", (e) => {
+            // collapse mobile menu if open
+            const bsCollapse = document.querySelector("#navMenu.collapse.show");
+            if (bsCollapse) {
+              const collapse =
+                bootstrap.Collapse.getInstance(bsCollapse) ||
+                new bootstrap.Collapse(bsCollapse);
+              collapse.hide();
+            }
+          });
+        });
+
+        const obs = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              const id = entry.target.id;
+              const link = document.querySelector(
+                '.navbar .nav-link[href="#' + id + '"]'
+              );
+              if (link) {
+                if (entry.isIntersecting && entry.intersectionRatio > 0.45) {
+                  navLinks.forEach((n) => n.classList.remove("active"));
+                  link.classList.add("active");
+                }
+              }
+            });
+          },
+          { threshold: [0.45] }
+        );
+
+        sections.forEach((s) => obs.observe(s));
+      })();
+    </script>
+
+    <!-- Bootstrap bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
 </html>
-  

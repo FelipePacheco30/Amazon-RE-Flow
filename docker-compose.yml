@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   web:
     build: .
@@ -6,7 +6,8 @@ services:
       - "8000:8000"
     volumes:
       - ./:/app:cached
+      - ./data:/app/data
     environment:
-      - AMZ_DB_PATH=data/db/reviews.db
-      - AMZ_RAW_CSV=data/raw/reviews.csv
-      - AMZ_EXPORT_CSV=data/export/reviews_for_dashboard.csv
+      - AMZ_DB_PATH=/app/data/db/reviews.db
+      - AMZ_EXPORT_CSV=/app/data/export/reviews_for_dashboard.csv
+    restart: unless-stopped

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: amzreflow-web
+    env: docker
+    docker:
+      dockerfilePath: Dockerfile
+    plan: free
+    # set the port for the health check
+    healthCheckPath: /api/health
+    autoDeploy: true
+disks:
+  - name: amzreflow-disk
+    sizeGB: 1

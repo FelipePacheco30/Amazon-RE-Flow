@@ -1,37 +1,30 @@
-# Diretórios de dados
 data/raw/
 data/processed/
 data/export/
 data/db/
 
-# Arquivos CSV/Excel temporários
+
 *.csv
 *.tsv
 *.xlsx
 
-# Banco SQLite
 *.db
 
-# Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Virtualenv
 .venv/
 venv/
 env/
 .amzreflow_py311/
 
-# Arquivos temporários de sistema/IDE
 .DS_Store
 Thumbs.db
 *.log
 
-# Docker
 *.pid
 *.sock
 
-# Notebooks de experimento
 *.ipynb_checkpoints/

@@ -1,4 +1,4 @@
-# Dockerfile - single image serving backend + static frontend
+
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1

@@ -3,31 +3,27 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="shortcut icon" href="../static/img/favicon.ico" type="image/x-icon">
     <title>Amazon Re-Flow</title>
 
-    <!-- Google Fonts -->
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap"
       rel="stylesheet"
     />
 
-    <!-- Bootstrap -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
 
-    <!-- AOS (Animate On Scroll) -->
     <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <style>
-      /* ---------- Theme variables ---------- */
       :root {
-        --accent-orange: #ff9900; /* Amazon-like orange */
-        --accent-dark: #0b2545; /* deep dark */
+        --accent-orange: #ff9900;
+        --accent-dark: #0b2545;
         --muted: #6b7280;
         --bg-surface: #ffffff;
         --glass: rgba(255, 255, 255, 0.6);
@@ -37,13 +33,11 @@
         --glass-blur: 10px;
       }
 
-      /* allow anchor scrolling to account for sticky topbar */
       html {
         scroll-behavior: smooth;
         scroll-padding-top: 86px;
       }
 
-      /* ---------- Base ---------- */
       body {
         font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
           "Helvetica Neue", Arial;
@@ -63,12 +57,11 @@
         text-decoration: none;
       }
 
-      /* ---------- Topbar (frosted) - sits at the very top ---------- */
       .topbar {
         position: sticky;
-        top: 0; /* moved to top to remove white gap */
+        top: 0; 
         z-index: 9999;
-        margin: 0 12px; /* keep horizontal breathing */
+        margin: 0 12px; 
         border-radius: 12px;
         background: rgba(11, 37, 69, 0.9);
         backdrop-filter: blur(6px) saturate(120%);
@@ -97,14 +90,12 @@
         filter: invert(1);
       }
 
-      /* active nav link (section visible) */
       .navbar .nav-link.active {
         color: var(--accent-orange) !important;
         text-decoration: underline;
         text-underline-offset: 4px;
       }
 
-      /* ---------- Hero ---------- */
       .hero-about {
         min-height: 78vh;
         display: flex;
@@ -112,7 +103,7 @@
         position: relative;
         overflow: hidden;
         color: white;
-        padding: 64px 0 28px; /* increased top padding so topbar doesn't overlap content */
+        padding: 64px 0 28px; 
       }
       .hero-inner {
         position: relative;
@@ -185,7 +176,6 @@
         font-size: 0.95rem;
       }
 
-      /* hero-impact (novo bloco centralizado, controla proporção) */
       .hero-impact {
         max-width: 720px;
         padding: 28px;
@@ -212,7 +202,6 @@
         font-weight: 900;
       }
 
-      /* ---------- Section title pill ---------- */
       .section-title {
         display: inline-flex;
         align-items: center;
@@ -242,7 +231,6 @@
         box-shadow: var(--card-shadow);
       }
 
-      /* ---------- KPI cards with subtle glass ---------- */
       .kpi-card {
         padding: 18px;
         border-radius: 12px;
@@ -257,7 +245,6 @@
         color: var(--muted);
       }
 
-      /* ---------- Charts layout improvements ---------- */
       .chart-wrap {
         height: 320px;
         display: flex;
@@ -267,7 +254,6 @@
         min-height: 220px;
       }
 
-      /* ---------- Reviews table ---------- */
       .reviews-panel {
         background: linear-gradient(180deg, #fff 0%, #fffaf3 100%);
         border-radius: 14px;
@@ -286,7 +272,6 @@
         width: 100%;
       }
 
-      /* modern table */
       #reviews-table {
         border-collapse: separate;
         border-spacing: 0 8px;
@@ -335,7 +320,6 @@
         cursor: not-allowed;
       }
 
-      /* ---------- Floating run button (keeps same IDs) ---------- */
       .fab-run {
         position: fixed;
         right: 22px;
@@ -346,7 +330,6 @@
         box-shadow: 0 12px 36px rgba(11, 37, 69, 0.12);
       }
 
-      /* ---------- Footer ---------- */
       footer.site-footer {
         padding: 28px 0;
         color: #fff;
@@ -401,7 +384,6 @@
         }
       }
 
-      /* micro-interactions */
       .section-card:hover {
         transform: translateY(-3px);
         transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -415,7 +397,6 @@
     </style>
   </head>
   <body id="page-top" data-bs-spy="scroll" data-bs-target="#navMenu" data-bs-offset="80" tabindex="0">
-    <!-- Topbar (no white gap above) -->
     <nav id="topbar" class="topbar navbar navbar-expand-lg">
       <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="#page-top">
@@ -467,7 +448,6 @@
       </div>
     </nav>
 
-    <!-- HERO / ABOUT -->
     <header class="hero-about" id="about" role="banner">
       <div class="hero-backdrop" aria-hidden="true"></div>
       <div class="hero-glow" aria-hidden="true"></div>
@@ -504,7 +484,6 @@
             </div>
           </div>
 
-          <!-- Substituí o card por um bloco centralizado e equilibrado -->
           <div
             class="col-lg-6 d-flex align-items-center justify-content-center"
             data-aos="fade-left"
@@ -541,7 +520,6 @@
       </div>
     </header>
 
-    <!-- OVERVIEW -->
     <section id="overview">
       <div class="container" data-aos="fade-up">
         <div class="section-title">Overview</div>
@@ -600,7 +578,6 @@
       </div>
     </section>
 
-    <!-- INSIGHTS -->
     <section
       id="insights"
       style="background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%)"
@@ -654,7 +631,6 @@
           </div>
         </div>
 
-        <!-- Custom Chart Builder -->
         <div class="row mt-4">
           <div class="col-12">
             <div class="section-card p-3">
@@ -688,7 +664,7 @@
                     id="custom-top-n"
                     class="form-control form-control-sm"
                     type="number"
-                    value="8"
+                    value="10"
                     min="1"
                     max="200"
                   />
@@ -711,11 +687,9 @@
             </div>
           </div>
         </div>
-        <!-- end custom builder -->
       </div>
     </section>
 
-    <!-- REVIEWS TABLE -->
     <section id="reviews">
       <div class="container" data-aos="fade-up">
         <div class="section-title">Reviews</div>
@@ -774,7 +748,6 @@
       </div>
     </section>
 
-    <!-- EXPORT -->
     <section
       id="export"
       style="background: linear-gradient(90deg, #fffaf0, #f0f9ff)"
@@ -807,7 +780,6 @@
       </div>
     </section>
 
-    <!-- footer -->
     <footer class="site-footer">
       <div class="footer-card container">
         <div class="small text-white-50">
@@ -816,7 +788,6 @@
       </div>
     </footer>
 
-    <!-- Floating action (keeps same IDs — safe to use) -->
     <div class="fab-run">
       <button
         id="run-pipeline-hero-fab"
@@ -827,11 +798,9 @@
       </button>
     </div>
 
-    <!-- AOS -->
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script>
       AOS.init({ duration: 700, once: true, easing: "ease-out-cubic" });
-      // small class toggle if scrolled
       window.addEventListener("scroll", () => {
         document
           .getElementById("topbar")
@@ -839,14 +808,11 @@
       });
     </script>
 
-    <!-- App JS (mantive a lógica exatamente igual — apenas estilizei a página) -->
     <script>
-      // cache do mapping product_id -> short name
-      let PRODUCTS_MAP_CACHE = null; // raw backend map
+      let PRODUCTS_MAP_CACHE = null;
       let productMap = {};
 
       async function fetchProductsMap() {
-        // single canonical loader
         if (PRODUCTS_MAP_CACHE) {
           productMap = PRODUCTS_MAP_CACHE;
           return PRODUCTS_MAP_CACHE;
@@ -874,25 +840,18 @@
         if (!name) return "";
         let s = String(name);
 
-        // remove parentheses content
         s = s.replace(/\(.*?\)/g, "");
 
-        // collapse whitespace
         s = s.replace(/\s+/g, " ").trim();
 
-        // take first segment before comma or hyphen
         let seg = s.split(/[,–\-]/)[0].trim();
 
-        // split into tokens and remove tokens containing digits (eg: '6"', '16GB', '2016')
         let tokens = seg.split(/[\s\/]+/).filter((t) => t && !/\d/.test(t));
 
-        // fallback: if all tokens removed (rare), use first words of original segment
         if (tokens.length === 0) tokens = seg.split(/\s+/).filter(Boolean);
 
-        // Take up to first 3 tokens but try to keep meaningful pair like "Kindle E-reader"
         const out = tokens.slice(0, 3).join(" ");
 
-        // Clean quotes
         return out.replace(/["']/g, "").trim() || seg;
       }
 
@@ -912,7 +871,6 @@
         return await r.json();
       }
 
-      // Normaliza a resposta: aceita array OR { total, rows }
       function normalizeListResponse(j) {
         if (!j) return { total: 0, rows: [] };
         if (Array.isArray(j)) return { total: j.length, rows: j };
@@ -972,13 +930,9 @@
 
       function friendlyProductName(pid) {
         if (!pid) return "";
-        // prefer the loaded productMap from backend
         if (productMap && productMap[pid]) return productMap[pid];
-        // fallback to PRODUCTS_MAP_CACHE (in case productMap not yet assigned)
         if (PRODUCTS_MAP_CACHE && PRODUCTS_MAP_CACHE[pid])
           return PRODUCTS_MAP_CACHE[pid];
-        // else: try to guess from pid-like string (last resort) or just show pid
-        // If pid looks like a long name (some CSVs may store name instead of id), try to simplify it:
         if (pid.length > 20 && /[A-Za-z]/.test(pid)) {
           return simplifyProductName(pid);
         }
@@ -990,7 +944,6 @@
           const limit = Number(
             document.getElementById("select-limit").value || 1000
           );
-          // ensure productMap loaded
           if (!productMap || Object.keys(productMap).length === 0) {
             productMap = await fetchProductsMap();
           }
@@ -998,7 +951,6 @@
           const all = await fetchReviewsAll(limit);
           const reviews = all.rows;
           lastFetched = all;
-          // garante array
           const sentiments = reviews.map((r) => r.sentiment || "unknown");
           const ratings = reviews.map((r) => Math.round(Number(r.rating) || 0));
           const keywords = reviews.flatMap((r) =>
@@ -1011,24 +963,21 @@
             .map((r) => (r.review_date ? new Date(r.review_date) : null))
             .filter(Boolean);
 
-          // Sentiment -> doughnut
           const sentMap = Object.fromEntries(
             topNMap(sentiments, 6).map((i) => [i[0], i[1]])
           );
           const sentLabels = Object.keys(sentMap);
           const sentData = sentLabels.map((l) => sentMap[l]);
-          // Sentiment -> doughnut with explicit color mapping
           const ctxSent = document
             .getElementById("chart-sentiment")
             .getContext("2d");
           if (charts.sent) charts.sent.destroy();
 
-          // map labels to colors so order doesn't break mapping
           const sentimentColorMap = {
-            positive: "#16a34a", // green
-            neutral: "#f59e0b", // amber/yellow
-            negative: "#e11d48", // red
-            unknown: "#94a3b8", // grayish fallback
+            positive: "#16a34a", 
+            neutral: "#f59e0b", 
+            negative: "#e11d48",
+            unknown: "#94a3b8",
           };
           const sentColors = sentLabels.map(
             (l) => sentimentColorMap[l] || sentimentColorMap["unknown"]
@@ -1050,7 +999,6 @@
             options: { plugins: { legend: { position: "bottom" } } },
           });
 
-          // Rating distribution -> bar
           const counts = {};
           for (const r of ratings) counts[r] = (counts[r] || 0) + 1;
           const allRatings = [1, 2, 3, 4, 5];
@@ -1073,7 +1021,6 @@
             },
           });
 
-          // Top products -> horizontal bar (use friendly names)
           const productsMap = await fetchProductsMap();
           const prodCounts = topNMap(
             reviews.map((r) => r.product_id),
@@ -1098,7 +1045,6 @@
             },
           });
 
-          // Keywords -> horizontal bar
           const kwMap = topNMap(keywords, 10);
           const kwLabels = kwMap.map((i) => i[0]);
           const kwValues = kwMap.map((i) => i[1]);
@@ -1119,7 +1065,6 @@
             },
           });
 
-          // Timeseries
           const byMonth = {};
           for (const d of times) {
             const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
@@ -1155,7 +1100,6 @@
             },
           });
 
-          // populate products select (show friendly names)
           const prodSel = document.getElementById("select-product");
           const prods = [...new Set(reviews.map((r) => r.product_id))].slice(
             0,
@@ -1187,7 +1131,6 @@
           .value.trim()
           .toLowerCase();
 
-        // garante que temos o mapping carregado
         await fetchProductsMap();
 
         const filtered = rows.filter((r) => {
@@ -1216,7 +1159,6 @@
           )
           .join("");
       }
-      // generate custom chart from lastFetched
       function generateCustomChart() {
         try {
           const metric = document.getElementById("custom-metric").value;
@@ -1259,7 +1201,6 @@
             labels = map.map((i) => i[0]);
             data = map.map((i) => i[1]);
           } else if (metric === "timeseries") {
-            // count by month
             const byMon = {};
             for (const r of rows) {
               if (!r.review_date) continue;
@@ -1276,8 +1217,6 @@
 
           const ctx = document.getElementById("chart-custom").getContext("2d");
           if (charts.custom) charts.custom.destroy();
-
-          // map "horizontalBar" to bar with indexAxis value
           const config = {
             type: chartType === "horizontalBar" ? "bar" : chartType,
             data: {
@@ -1309,8 +1248,6 @@
           console.error("generateCustomChart error", e);
         }
       }
-
-      // UI bindings
       document
         .getElementById("btn-export")
         ?.addEventListener("click", genExportUI);
@@ -1370,7 +1307,6 @@
             body: JSON.stringify({ to_db: true }),
           });
           console.log("Análise iniciada.");
-          // small polling updates
           setTimeout(() => {
             renderKPIs();
             renderCharts();
@@ -1421,7 +1357,6 @@
       }
 
       (async function init() {
-        // load product map early
         productMap = await fetchProductsMap();
         await renderKPIs();
         await renderCharts();
@@ -1429,7 +1364,6 @@
         setInterval(renderKPIs, 12000);
       })();
 
-      /* ---------- Nav highlight on scroll ---------- */
       (function () {
         const sectionIds = [
           "about",
@@ -1445,10 +1379,8 @@
           .map((id) => document.getElementById(id))
           .filter(Boolean);
 
-        // when clicking a nav link, close collapsed menu (mobile) and ensure smooth behavior
         navLinks.forEach((link) => {
           link.addEventListener("click", (e) => {
-            // collapse mobile menu if open
             const bsCollapse = document.querySelector("#navMenu.collapse.show");
             if (bsCollapse) {
               const collapse =
@@ -1480,8 +1412,7 @@
         sections.forEach((s) => obs.observe(s));
       })();
     </script>
-
-    <!-- Bootstrap bundle -->
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

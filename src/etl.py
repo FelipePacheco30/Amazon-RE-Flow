@@ -1,9 +1,7 @@
-# src/etl.py
 import ast
 import pandas as pd
 import os
 
-# ---------- Helpers ----------
 def extract_first_asin(val):
     """Tenta extrair um ASIN único a partir de formatos comuns."""
     if pd.isna(val):
@@ -32,7 +30,6 @@ def normalize_colnames(cols):
         out.append(n)
     return out
 
-# ---------- ETL functions ----------
 def extract(path, usecols=None, nrows=None):
     """
     Lê CSV e retorna um DataFrame.
@@ -43,7 +40,6 @@ def extract(path, usecols=None, nrows=None):
     if not os.path.exists(path):
         raise FileNotFoundError(f"Arquivo não encontrado: {path}")
     df = pd.read_csv(path, low_memory=False, usecols=usecols, nrows=nrows)
-    # Normaliza nomes das colunas imediatamente
     df.columns = normalize_colnames(df.columns)
     print(f"[extract] lido {len(df)} linhas e {len(df.columns)} colunas de {path}")
     return df
@@ -58,7 +54,6 @@ def transform(df):
     """
     df = df.copy()
 
-    # 1) Mapeamento de colunas para o schema que usaremos
     mapping_candidates = {
         'reviews_id': 'review_id',
         'review_id': 'review_id',
@@ -81,57 +76,43 @@ def transform(df):
         'categories': 'categories',
         'primarycategories': 'primarycategories'
     }
-    # constrói mapping só com chaves existentes
     mapping = {k: v for k, v in mapping_candidates.items() if k in df.columns}
     if mapping:
         df = df.rename(columns=mapping)
 
-    # 2) Resolver possíveis colunas duplicadas por coalescing:
-    # (se houver 'review_id' duplicada etc., pega o primeiro não-nulo)
-    # já deve ter sido tratado, mas deixamos um passo seguro:
     cols = df.columns.tolist()
     dup_names = [name for name in set(cols) if cols.count(name) > 1]
     for dup in dup_names:
         df_dup = df.loc[:, [c for c in df.columns if c == dup]]
         combined = df_dup.bfill(axis=1).iloc[:, 0]
-        # drop original (todas ocorrências) e re-inserir a combinada
         df = df.loc[:, ~pd.Index(df.columns).isin([dup])]
         df[dup] = combined
 
-    # 3) Aplicar transformações nos campos importantes
-    # product_id (ASIN)
     if 'product_id' in df.columns:
         df['product_id'] = df['product_id'].apply(extract_first_asin)
 
-    # review_text: garantir string
     if 'review_text' in df.columns:
         df['review_text'] = df['review_text'].astype(str)
 
-    # rating -> numérico
     if 'rating' in df.columns:
         df['rating'] = pd.to_numeric(df['rating'], errors='coerce')
 
-    # review_date -> datetime (UTC)
     if 'review_date' in df.columns:
         df['review_date'] = pd.to_datetime(df['review_date'], errors='coerce', utc=True)
 
-    # features simples do texto
     if 'review_text' in df.columns:
         df['review_len'] = df['review_text'].str.len()
         df['review_word_count'] = df['review_text'].str.split().str.len()
 
-    # remover reviews sem texto útil
     if 'review_text' in df.columns:
         mask_valid_text = df['review_text'].notna() & (df['review_text'].str.strip() != '') & (df['review_text'].str.lower() != 'nan')
         df = df[mask_valid_text].copy()
 
-    # remover duplicatas por review_id se existir, senão global
     if 'review_id' in df.columns:
         df = df.drop_duplicates(subset=['review_id'], keep='first')
     else:
         df = df.drop_duplicates()
 
-    # reset index
     df = df.reset_index(drop=True)
 
     print(f"[transform] saída com {len(df)} linhas e {len(df.columns)} colunas")
@@ -146,7 +127,6 @@ def save_processed(df, out_path='../data/processed/reviews_clean.csv'):
     print(f"[save_processed] salvo {len(df)} linhas em {out_path}")
     return out_path
 
-# Optional: quick CLI to run only ETL (useful while main.py still integra NLP/DB)
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="ETL: extract, transform and save processed CSV")

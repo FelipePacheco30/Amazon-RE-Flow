@@ -1,8 +1,10 @@
+.vscode
+.env
+venv
 __pycache__
 *.pyc
-.env
-.vscode
+data/
+*.db
 .git
-data/*
-!data/db
-!data/db/*.db
+.gitignore
+node_modules

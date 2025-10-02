@@ -1,25 +1,32 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-DB_PATH=${AMZ_DB_PATH:-/app/data/db/reviews.db}
-RAW_CSV=${AMZ_RAW_CSV:-/app/data/raw/reviews_sample.csv}
-PORT=${PORT:-8000}
+# default port
+PORT="${PORT:-8000}"
 
-# ensure db directory
-mkdir -p "$(dirname "$DB_PATH")"
-mkdir -p /app/data/processed
+# Make sure Python can import the "src" package no matter where it was copied.
+# If repo layout is /app/src -> add /app; if it's /src -> add / (parent dir).
+PYTHONPATH="${PYTHONPATH:-}"
+if [ -d "/app/src" ]; then
+  PYTHONPATH="/app:${PYTHONPATH}"
+fi
+if [ -d "/src" ]; then
+  # parent of /src is / which is already on sys.path normally, but make explicit
+  PYTHONPATH="/:${PYTHONPATH}"
+fi
+export PYTHONPATH
 
-# If DB missing, try to create from CSV (non-fatal)
-if [ ! -f "$DB_PATH" ]; then
-  if [ -f "$RAW_CSV" ]; then
-    echo "DB not found at $DB_PATH — creating from $RAW_CSV"
-    python -m src.main --source "$RAW_CSV" --out /app/data/processed/reviews_processed.csv --to-db --db "$DB_PATH" || echo "Pipeline failed at startup (continuing without DB)"
-  else
-    echo "DB not found and raw CSV missing ($RAW_CSV). Starting without DB."
-  fi
-else
-  echo "DB found at $DB_PATH — skipping seed."
+# ensure NLTK data dir exists (if used)
+if [ -n "${NLTK_DATA:-}" ]; then
+  mkdir -p "$NLTK_DATA"
+  chown -R "$(id -u):$(id -g)" "$NLTK_DATA" || true
 fi
 
-# start gunicorn (increase timeout to avoid worker timeouts on slow startups)
-exec gunicorn -w 2 -b 0.0.0.0:${PORT} --timeout 120 "src.app:app"
+echo "Starting container"
+echo "PORT=$PORT"
+echo "PYTHONPATH=$PYTHONPATH"
+
+# If DB missing attempt to create it non-blocking (entrypoint may call pipeline)
+# The original entrypoint logic (if any) can be placed here; keep lightweight.
+# Finally start Gunicorn serving the Flask app (module 'src.app:app').
+exec gunicorn --bind "0.0.0.0:${PORT}" --workers 3 --worker-class sync "src.app:app"

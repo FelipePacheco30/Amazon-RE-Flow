@@ -10,7 +10,7 @@
 
 **Amazon RE:Flow** é um projeto de pesquisa e engenharia de dados que constrói um pipeline (ETL + NLP) para transformar *reviews* de produtos da Amazon em insights acionáveis. Conceito com foco em automação, reprodutibilidade e preparação de dados para visualização em dashboards (Looker Studio via Google Sheets).
 
-**clique no botão [site/online] para acessar o site.**
+**clique no botão [site/online] para acessar o site(pode levar ate 30 segundos para carregar).**
 
 ---
 

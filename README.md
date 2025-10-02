@@ -2,8 +2,8 @@
 
 <div align="center">
 
-[![Site](https://img.shields.io/badge/🌐_Site-Online-000000?style=for-the-badge)]()
-[![Status](https://img.shields.io/badge/⚙️_Status-concluido-green?style=for-the-badge)](#-sobre-o-projeto)
+[![Site](https://img.shields.io/badge/🌐_Site-Online-000000?style=for-the-badge)](https://mechanical-josy-felipedev-3fef2e29.koyeb.app/)
+[![Status](https://img.shields.io/badge/⚙️_Status-concluido-green?style=for-the-badge)]()
 
 </div>
 

@@ -1,7 +1,16 @@
 # Amazon RE:Flow
 
-**Amazon RE:Flow** é um projeto de pesquisa e engenharia de dados que constrói um pipeline local (ETL + NLP) para transformar *reviews* de produtos da Amazon em insights acionáveis.  
-Este repositório é o resultado de uma prova de conceito com foco em automação, reprodutibilidade e preparação de dados para visualização em dashboards (Looker Studio via Google Sheets).
+<div align="center">
+
+[![Site](https://img.shields.io/badge/🌐_Site-Online-000000?style=for-the-badge)]()
+[![Status](https://img.shields.io/badge/⚙️_Status-concluido-green?style=for-the-badge)](#-sobre-o-projeto)
+
+</div>
+
+
+**Amazon RE:Flow** é um projeto de pesquisa e engenharia de dados que constrói um pipeline (ETL + NLP) para transformar *reviews* de produtos da Amazon em insights acionáveis. Conceito com foco em automação, reprodutibilidade e preparação de dados para visualização em dashboards (Looker Studio via Google Sheets).
+
+**clique no botão [site/online] para acessar o site.**
 
 ---
 
@@ -10,10 +19,11 @@ Transformar o grande volume de avaliações de consumidores em sinais claros par
 
 ---
 
-## ❓ Problema que resolvemos
+## ❓ Problemas
 Plataformas de e-commerce produzem milhões de reviews em texto livre. Esses textos são valiosos, porém:
-- Estão sujos e pouco padronizados;
-- Têm duplicatas e metadados inconsistentes;
+
+- Estão sujos e pouco padronizados;  
+- Têm duplicatas e metadados inconsistentes;  
 - Exigem processamento para métricas agregadas (sentimento, temas, evolução temporal).
 
 **Amazon RE:Flow** resolve isso oferecendo um fluxo reprodutível que transforma CSVs de reviews em um conjunto limpo e enriquecido com análises de texto, pronto para alimentar dashboards e relatórios.
@@ -21,76 +31,109 @@ Plataformas de e-commerce produzem milhões de reviews em texto livre. Esses tex
 ---
 
 ## 🎯 Objetivos do projeto
-- Construir um pipeline confiável e auditável que execute: *extract → transform → load → analyze → export*.  
-- Enriquecer cada review com: `clean_text`, `sentiment` (positive/neutral/negative) e `keywords`.  
-- Persistir os dados localmente (SQLite via SQLAlchemy) e gerar CSVs prontos para dashboards.  
-- Fornecer documentação e etapas claras para futura migração para nuvem.
+
+- Construir um pipeline confiável e auditável que execute: `extract → transform → load → analyze → export`.  
+- Enriquecer cada review com: `clean_text`, `sentiment` (positive / neutral / negative) e `keywords`.  
+- Persistir os dados (SQLite via SQLAlchemy) e gerar CSVs prontos para dashboards. 
 
 ---
 
-## 📦 Dataset
-Fonte: coleções públicas de *Amazon Consumer Reviews* (Datafiniti / Kaggle).  
-Características importantes:
-- Contém metadados do produto (ASINs, brand, categorias) e campos de review (`reviews.text`, `reviews.rating`, `reviews.date`, `reviews.id`).  
-- O pipeline unifica, limpa e padroniza esses campos, produzindo um dataset consolidado.
+
+## ⚙️ Como rodar (localmente sem docker)
+
+### Requisitos
+- Python 3.11 (recomendado)  
+- pip, virtualenv (ou conda)  
+- opcional: Docker
+
+### Local (sem Docker)
+```bash
+# clonar
+git clone https://github.com/<seu-usuario>/Amazon-RE-Flow.git
+cd Amazon-RE-Flow
+
+# criar venv e instalar
+python -m venv .venv
+source .venv/bin/activate   # unix/mac
+# .venv\Scripts\activate     # windows
+pip install -r requirements.txt
+
+# rodar pipeline local (gera CSV e sqlite)
+python -m src.main --source data/raw/reviews_sample.csv --out data/processed/reviews_clean.csv --to-db --db data/db/reviews.db
+
+# rodar app (dev)
+python -m src.app
+# ou com gunicorn
+gunicorn src.app:app --bind 0.0.0.0:8000
+```
 
 ---
 
-## 🔬 Metodologia (nível alto)
-1. **Ingestão (Extract):** leitura de CSV(s) brutos.  
-2. **Limpeza (Transform):** normalização de nomes de coluna, remoção de duplicatas, preenchimento/tratamento de nulos, padronização de datas.  
-3. **Enriquecimento (NLP):** limpeza de texto (remoção de URLs, emojis e ruído), análise de sentimento (VADER ou similar), extração de palavras-chave por review.  
-4. **Persistência (Load):** armazenamento em SQLite para consultas e integridade; exportação de CSV para Google Sheets.  
-5. **Visualização:** dashboards no Looker Studio com métricas agregadas e exploratórias.
+## 🐳 Como rodar com Docker
+
+### Build (no root do repo)
+    docker compose up --build
+
+`abra localhost:8000 no navegador de sua preferencia`
 
 ---
 
-## 🧠 Insights esperados / Métricas
-- Distribuição de sentimento por produto/brand.  
-- Média e variação de rating ao longo do tempo.  
-- Tópicos/keywords mais frequentes por categoria de produto.  
-- Detecção de reviews com alto *helpfulness* (quando disponível).  
+## 📊 Como gerar gráficos
 
-Esses insumos suportam decisões como priorização de correções, identificação de produtos problemáticos e melhoria de copy/descrição.
+### 1) Usando a interface web 
 
----
+1. Acesse o app (ex.: `http://localhost:8000` ou `https://mechanical-josy-felipedev-3fef2e29.koyeb.app/`).
+2. Na seção **Overview / Insights**, os gráficos principais são renderizados automaticamente a partir dos dados carregados.
+3. Para customizar, use o **Custom Chart Builder**:
 
-## ⚖️ Ética, privacidade e limitações
-- **Privacidade:** dados de reviews públicos são analisados, mas consideramos anonimização de `username` e remoção de PII se for necessário para divulgação.  
-- **Bias e representatividade:** amostras podem refletir vieses (ex.: mais reviews para produtos populares). As conclusões devem considerar esse viés.  
-- **Limitação técnica:** a versão atual é local e visa eficiência em máquinas modestas; modelos mais avançados (transformers) estão fora do escopo inicial por custo computacional.
+   * `Metric`: escolha `by_product`, `by_sentiment`, `by_rating`, `by_keyword` ou `timeseries`.
+   * `Chart type`: selecione `Bar`, `Horizontal Bar`, `Pie` ou `Line`.
+   * `Top N`: número de itens (por exemplo, top 10).
+   * Clique em **Generate** — o gráfico aparecerá na área abaixo.
 
----
-
-## 🚀 Resultados entregáveis
-- Dataset limpo e enriquecido: `data/processed/reviews_clean.csv`.  
-- Banco local SQLite com tabela `reviews`.  
-- CSV para dashboard: `data/export/reviews_for_dashboard.csv`.  
-- Documentação e roteiro de migração para nuvem (GCS → BigQuery).  
-- Looker Studio configurado apontando para o Google Sheet com os dados exportados.
 
 ---
 
-## 🛣 Roadmap / Evolução futura
-**Curto prazo**
-- Melhorar extração de keywords (phrase detection).  
-- Adicionar testes automatizados e CI básico.
+## 📤 Como gerar CSV para Google Sheets / Looker Studio
 
-**Médio prazo**
-- Dockerizar pipeline e criar workflow para execução periódica.  
-- Automatizar upload para Google Sheets (ou usar BigQuery para dashboards maiores).
+### Gerar csv para dashboard
+    1. No app clique em **Gerar CSV** (botão `Gerar CSV` na seção Export).
+    2. Após processar, botão `Download CSV` aparecerá. Baixe o arquivo `reviews_for_dashboard.csv`.
+    
+`screenshots/google-sheets-dashboard.png`
 
-**Longo prazo**
-- Migrar análise de sentimento para modelos mais sofisticados (fine-tuned transformers) e suportar streaming de reviews em tempo real.
+### Fazer upload para Google Sheets
+    1. Abra Google Sheets → `Arquivo` → `Importar` → `Upload` → selecione o CSV gerado.
+    2. Escolha `Substituir planilha` ou `Inserir nova planilha` conforme preferir.
+
+`screenshots/google-sheets-dashboard.png`
+
+
+### Conectar Looker Studio
+
+    1. No Looker Studio crie uma nova fonte de dados apontando para **Google Sheets** (escolha a planilha com o CSV importado).
+    2. Construir painéis: filtros por `product`, `sentiment`, `rating`, intervalo de datas.
+    3. Se preferir dados maiores e mais dinâmicos, use BigQuery (exporte CSV para GCS e depois importe para BQ) e conecte Looker Studio ao BigQuery.
 
 ---
 
-## 🧩 Público-alvo
-- Equipes de produto/ops buscando entender feedback do usuário.  
-- Pesquisadores que querem um pipeline reprodutível para análises textuais.  
-- Desenvolvedores que desejam um template de ETL local com NLP integrado.
+## 📚 Estrutura do repositório (resumida)
 
----
-
-## 🧑‍🤝‍🧑 crédito
-- Inspirado por datasets públicos (Datafiniti/Kaggle) e práticas padrão de engenharia de dados.
+```
+.
+├─ data/
+│  ├─ raw/                # CSVs brutos (ex.: reviews_sample.csv)
+│  ├─ processed/          # CSVs processados pelo pipeline
+│  └─ db/                 # sqlite (reviews.db)
+├─ src/
+│  ├─ etl.py              # extração e transformação
+│  ├─ nlp.py              # limpeza, sentiment, keywords
+│  ├─ db.py               # persistência via sqlalchemy
+│  └─ app.py              # API + endpoints para frontend
+├─ frontend/              # HTML / CSS / JS estáticos do dashboard
+├─ screenshots/           
+├─ requirements.txt
+├─ Dockerfile
+├─ Procfile
+└─ README.md
+```

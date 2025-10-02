@@ -1,0 +1,1 @@
+bash -lc "python -m nltk.downloader punkt stopwords vader_lexicon >/dev/null 2>&1 || true && python -m src.main --source data/raw/reviews_sample.csv --out data/processed/reviews_clean_sample_nlp.csv --to-db --db data/db/reviews.db || true && gunicorn --bind 0.0.0.0:$PORT src.app:app"

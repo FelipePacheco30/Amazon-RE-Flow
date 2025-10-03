@@ -100,13 +100,13 @@ gunicorn src.app:app --bind 0.0.0.0:8000
     1. No app clique em **Gerar CSV** (botão `Gerar CSV` na seção Export).
     2. Após processar, botão `Download CSV` aparecerá. Baixe o arquivo `reviews_for_dashboard.csv`.
     
-`screenshots/google-sheets-dashboard.png`
+<img alt="CSV-Download" src="/assets/csv-download.png"/>
 
 ### Fazer upload para Google Sheets
     1. Abra Google Sheets → `Arquivo` → `Importar` → `Upload` → selecione o CSV gerado.
     2. Escolha `Substituir planilha` ou `Inserir nova planilha` conforme preferir.
 
-`screenshots/google-sheets-dashboard.png`
+<img alt="google-sheets-dashboard" src="/assets/google-sheets-dashboard.png"/>
 
 
 ### Conectar Looker Studio
@@ -114,6 +114,8 @@ gunicorn src.app:app --bind 0.0.0.0:8000
     1. No Looker Studio crie uma nova fonte de dados apontando para **Google Sheets** (escolha a planilha com o CSV importado).
     2. Construir painéis: filtros por `product`, `sentiment`, `rating`, intervalo de datas.
     3. Se preferir dados maiores e mais dinâmicos, use BigQuery (exporte CSV para GCS e depois importe para BQ) e conecte Looker Studio ao BigQuery.
+
+<img alt="looker-studio-dashboard" src="/assets/looker-studio-dashboard.png"/>
 
 ---
 
@@ -137,3 +139,4 @@ gunicorn src.app:app --bind 0.0.0.0:8000
 ├─ Procfile
 └─ README.md
 ```
+

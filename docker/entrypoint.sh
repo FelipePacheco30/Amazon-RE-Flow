@@ -29,3 +29,4 @@ fi
 
 # start gunicorn (module wsgi: app is expected to be available)
 exec gunicorn -w "${WORKERS}" -b 0.0.0.0:"${PORT}" --access-logfile - --error-logfile - src.app:app
+
